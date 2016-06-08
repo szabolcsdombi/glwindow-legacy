@@ -4,10 +4,9 @@
 #define _WIN32_WINNT 0x500
 
 #include <Windows.h>
-
-#include <WindowsGL.h>
-
 #include <cstdio>
+
+#include "WindowsGL.h"
 
 const wchar_t * errorMessage = L"";
 bool moduleReady = false;

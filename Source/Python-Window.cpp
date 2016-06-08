@@ -1,6 +1,5 @@
-#include <Python.h>
-
-#include <Window.h>
+#include "Python.h"
+#include "Window.h"
 
 PyObject * InitializeWindow(PyObject * self, PyObject * args) {
 	if (!PyArg_ParseTuple(args, ":InitializeWindow")) {
@@ -127,9 +126,9 @@ static struct PyModuleDef moduledef = {
 };
 
 extern "C" {
-	PyObject * PyInit_PyWindow();
+	PyObject * PyInit_GLWindow();
 }
 
-PyObject * PyInit_PyWindow() {
+PyObject * PyInit_GLWindow() {
 	return PyModule_Create(&moduledef);
 }

@@ -1,1 +1,1 @@
-from .ModernGL import *
+from .GLWindow import *
