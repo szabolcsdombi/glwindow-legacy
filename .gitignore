@@ -1,0 +1,12 @@
+__pycache__
+
+Bin
+Temp
+
+PythonPackage/build
+PythonPackage/dist
+
+PythonPackage/files.txt
+PythonPackage/GLWindow.egg-info
+PythonPackage/MANIFEST
+PythonPackage/Source
