@@ -9,3 +9,8 @@ dist
 files.txt
 GLWindow.egg-info
 MANIFEST
+
+Makefile
+Clean.py
+
+*.bat
