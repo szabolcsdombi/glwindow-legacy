@@ -405,13 +405,13 @@ namespace Window {
 			return false;
 		}
 
-		int attriblist[] = {
-			WindowsGL::WGL_CONTEXT_MAJOR_VERSION, major,
-			WindowsGL::WGL_CONTEXT_MINOR_VERSION, minor,
-			0, 0,
-		};
+		// int attriblist[] = {
+		// 	WindowsGL::WGL_CONTEXT_MAJOR_VERSION, major,
+		// 	WindowsGL::WGL_CONTEXT_MINOR_VERSION, minor,
+		// 	0, 0,
+		// };
 
-		hglrc = WindowsGL::wglCreateContextAttribs(hdc, 0, attriblist);
+		hglrc = WindowsGL::wglCreateContextAttribs(hdc, 0, 0);
 
 		if (!hglrc) {
 			errorMessage = L"wglCreateContextAttribs failed.";
