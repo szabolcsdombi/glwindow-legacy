@@ -1,5 +1,10 @@
 from setuptools import setup, Extension
 
+try:
+	from Development import cccompiler
+except ImportError:
+	pass
+
 GLWindow = Extension(
 	'GLWindow.GLWindow',
 	libraries = ['User32', 'opengl32', 'gdi32'],
