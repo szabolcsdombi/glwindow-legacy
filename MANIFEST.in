@@ -1,2 +1,1 @@
-include Source/WindowsGL.h
-include Source/Window.h
+include Source/ModernContext.hpp

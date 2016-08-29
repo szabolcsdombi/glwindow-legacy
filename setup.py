@@ -2,17 +2,16 @@ from setuptools import setup, Extension
 
 GLWindow = Extension(
 	'GLWindow.GLWindow',
-	libraries = ['User32'],
+	libraries = ['User32', 'opengl32', 'gdi32'],
 	sources = [
-		'Source/WindowsGL.cpp',
-		'Source/Window.cpp',
-		'Source/Python-Window.cpp',
+		'Source/GLWindow.cpp',
+		'Source/ModernContext.cpp',
 	]
 )
 
 setup(
 	name = 'GLWindow',
-	version = '0.3.0',
+	version = '1.0.0',
 	description = 'GLWindow',
 	url = 'https://github.com/cprogrammer1994/GLWindow',
 	author = 'Szabolcs Dombi',
