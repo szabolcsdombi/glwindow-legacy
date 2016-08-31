@@ -242,6 +242,10 @@ PyObject * Update(PyObject * self, PyObject * args) {
 	Py_RETURN_TRUE;
 }
 
+PyObject * Destroy(PyObject * self, PyObject * args) {
+	Py_RETURN_NONE;
+}
+
 PyObject * GetSize(PyObject * self, PyObject * args) {
 	PyObject * size = PyTuple_New(2);
 	PyTuple_SET_ITEM(size, 0, PyLong_FromLong(window_width));
@@ -357,6 +361,7 @@ PyObject * KeyUp(PyObject * self, PyObject * args) {
 PyMethodDef methods[] = {
 	{"Init", Init, METH_VARARGS, 0},
 	{"Update", Update, METH_VARARGS, 0},
+	{"Destroy", Destroy, METH_VARARGS, 0},
 	{"GetSize", GetSize, METH_VARARGS, 0},
 	{"GetTime", GetTime, METH_VARARGS, 0},
 	{"GetTimeDelta", GetTimeDelta, METH_VARARGS, 0},
