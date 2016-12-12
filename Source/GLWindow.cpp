@@ -111,6 +111,11 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
 PyObject * Init(PyObject * self, PyObject * args) {
 	int samples = 16;
+	int debug_border = 0;
+
+	if (!PyArg_ParseTuple(args, "|II", &samples)) {
+		return 0;
+	}
 
 	QueryPerformanceFrequency((LARGE_INTEGER *)&counter_frequecy);
 
@@ -145,10 +150,10 @@ PyObject * Init(PyObject * self, PyObject * args) {
 		L"GLWindow",					// lpClassName
 		0,								// lpWindowName
 		WS_POPUP,						// dwStyle
-		0,								// x
-		0,								// y
-		window_width,					// nWidth
-		window_height,					// nHeight
+		0 + debug_border,				// x
+		0 + debug_border,				// y
+		window_width - debug_border,	// nWidth
+		window_height - debug_border,	// nHeight
 		0,								// hWndParent
 		0,								// hMenu
 		hinst,							// hInstance
