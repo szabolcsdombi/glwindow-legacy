@@ -113,7 +113,7 @@ PyObject * Init(PyObject * self, PyObject * args) {
 	int samples = 16;
 	int debug_border = 0;
 
-	if (!PyArg_ParseTuple(args, "|II", &samples)) {
+	if (!PyArg_ParseTuple(args, "|II", &debug_border, &samples)) {
 		return 0;
 	}
 
