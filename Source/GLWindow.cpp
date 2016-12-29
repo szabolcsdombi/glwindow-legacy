@@ -25,6 +25,9 @@ long long counter_last;
 double time_delta;
 double elapsed;
 
+int window_activate;
+bool window_cursor = true;
+
 bool window_alive;
 bool key_down[256];
 
@@ -34,6 +37,8 @@ int window_height;
 int mx;
 int my;
 int mw;
+
+int debug;
 
 HGLRC hglrc;
 HWND hwnd;
@@ -54,6 +59,9 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 			break;
 		}
 		case WM_MOUSEMOVE: {
+			if (!window_activate) {
+				break;
+			}
 			POINT cursor;
 			GetCursorPos(&cursor);
 			int cx = window_width / 2;
@@ -90,11 +98,38 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 			break;
 		}
 		case WM_KEYDOWN: {
+			if (debug) {
+				if (wParam == 27 && !key_down[wParam & 0xFF]) {
+					HWND console = GetConsoleWindow();
+					SetWindowPos(console, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+					SetActiveWindow(console);
+					SetFocus(console);
+				}
+			}
 			key_down[wParam & 0xFF] = true;
 			break;
 		}
 		case WM_KEYUP: {
 			key_down[wParam & 0xFF] = false;
+			break;
+		}
+		case WM_ACTIVATE: {
+			window_activate = wParam;
+			if (window_activate) {
+				int cx = window_width / 2;
+				int cy = window_height / 2;
+				SetCursorPos(cx, cy);
+
+				if (window_cursor) {
+					window_cursor = false;
+					ShowCursor(false);
+				}
+			} else {
+				if (!window_cursor) {
+					window_cursor = true;
+					ShowCursor(true);
+				}
+			}
 			break;
 		}
 		case WM_CLOSE: {
@@ -109,11 +144,22 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 
-PyObject * Init(PyObject * self, PyObject * args) {
-	int samples = 16;
-	int dbg_border = 0;
+PyObject * Init(PyObject * self, PyObject * args, PyObject * kwargs) {
+	static const char * kwlist[] = {"samples", "debug", 0};
 
-	if (!PyArg_ParseTuple(args, "|II", &dbg_border, &samples)) {
+	int samples = 16;
+
+	int parse_args = PyArg_ParseTupleAndKeywords(
+		args,
+		kwargs,
+		"|I$p:Init",
+		(char **)kwlist,
+		&samples,
+		&debug
+	);
+
+	if (!parse_args) {
+		// PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
 		return 0;
 	}
 
@@ -145,19 +191,25 @@ PyObject * Init(PyObject * self, PyObject * args) {
 	window_width = GetSystemMetrics(SM_CXSCREEN);
 	window_height = GetSystemMetrics(SM_CYSCREEN);
 
+	int style = WS_POPUP;
+
+	// if (debug) {
+	// 	style |= WS_CLIPCHILDREN;
+	// }
+
 	hwnd = CreateWindowEx(
-		0,								// exStyle
-		L"GLWindow",					// lpClassName
-		0,								// lpWindowName
-		WS_POPUP,						// dwStyle
-		0 + dbg_border,					// x
-		0 + dbg_border,					// y
-		window_width - dbg_border * 2,	// nWidth
-		window_height - dbg_border * 2,	// nHeight
-		0,								// hWndParent
-		0,								// hMenu
-		hinst,							// hInstance
-		0								// lpParam
+		0,									// exStyle
+		L"GLWindow",						// lpClassName
+		0,									// lpWindowName
+		style,								// dwStyle
+		0,									// x
+		0,									// y
+		window_width,						// nWidth
+		window_height - (debug ? 1 : 0),	// nHeight
+		0,									// hWndParent
+		0,									// hMenu
+		hinst,								// hInstance
+		0									// lpParam
 	);
 
 	if (!hwnd) {
@@ -184,7 +236,7 @@ PyObject * Init(PyObject * self, PyObject * args) {
 	Py_RETURN_NONE;
 }
 
-PyObject * Update(PyObject * self, PyObject * args) {
+PyObject * Update(PyObject * self) {
 	if (!window_alive) {
 		Py_RETURN_FALSE;
 	}
@@ -197,12 +249,20 @@ PyObject * Update(PyObject * self, PyObject * args) {
 		int cx = window_width / 2;
 		int cy = window_height / 2;
 		SetCursorPos(cx, cy);
-		ShowCursor(false);
+
+		if (window_cursor) {
+			window_cursor = false;
+			ShowCursor(false);
+		}
 
 		ShowWindow(hwnd, SW_SHOW);
 		SetForegroundWindow(hwnd);
 		SetActiveWindow(hwnd);
 		SetFocus(hwnd);
+
+		// if (debug) {
+		// 	SetParent(GetConsoleWindow(), hwnd);
+		// }
 
 		window_visible = true;
 	}
@@ -247,26 +307,26 @@ PyObject * Update(PyObject * self, PyObject * args) {
 	Py_RETURN_TRUE;
 }
 
-PyObject * Destroy(PyObject * self, PyObject * args) {
+PyObject * Destroy(PyObject * self) {
 	Py_RETURN_NONE;
 }
 
-PyObject * GetSize(PyObject * self, PyObject * args) {
+PyObject * GetSize(PyObject * self) {
 	PyObject * size = PyTuple_New(2);
 	PyTuple_SET_ITEM(size, 0, PyLong_FromLong(window_width));
 	PyTuple_SET_ITEM(size, 1, PyLong_FromLong(window_height));
 	return size;
 }
 
-PyObject * GetTime(PyObject * self, PyObject * args) {
+PyObject * GetTime(PyObject * self) {
 	return PyFloat_FromDouble(elapsed);
 }
 
-PyObject * GetTimeDelta(PyObject * self, PyObject * args) {
+PyObject * GetTimeDelta(PyObject * self) {
 	return PyFloat_FromDouble(time_delta);
 }
 
-PyObject * GetMouse(PyObject * self, PyObject * args) {
+PyObject * GetMouse(PyObject * self) {
 	PyObject * mouse = PyTuple_New(3);
 	PyTuple_SET_ITEM(mouse, 0, PyLong_FromLong(mx));
 	PyTuple_SET_ITEM(mouse, 1, PyLong_FromLong(my));
@@ -274,7 +334,7 @@ PyObject * GetMouse(PyObject * self, PyObject * args) {
 	return mouse;
 }
 
-PyObject * GetText(PyObject * self, PyObject * args) {
+PyObject * GetText(PyObject * self) {
 	PyObject * text = 0;
 	return text;
 }
@@ -364,18 +424,18 @@ PyObject * KeyUp(PyObject * self, PyObject * args) {
 }
 
 PyMethodDef methods[] = {
-	{"Init", Init, METH_VARARGS, 0},
-	{"Update", Update, METH_VARARGS, 0},
-	{"Destroy", Destroy, METH_VARARGS, 0},
-	{"GetSize", GetSize, METH_VARARGS, 0},
-	{"GetTime", GetTime, METH_VARARGS, 0},
-	{"GetTimeDelta", GetTimeDelta, METH_VARARGS, 0},
-	{"GetMouse", GetMouse, METH_VARARGS, 0},
-	{"GetText", GetText, METH_VARARGS, 0},
-	{"KeyPressed", KeyPressed, METH_VARARGS, 0},
-	{"KeyDown", KeyDown, METH_VARARGS, 0},
-	{"KeyReleased", KeyReleased, METH_VARARGS, 0},
-	{"KeyUp", KeyUp, METH_VARARGS, 0},
+	{"Init", (PyCFunction)Init, METH_VARARGS | METH_KEYWORDS, 0},
+	{"Update", (PyCFunction)Update, METH_NOARGS, 0},
+	{"Destroy", (PyCFunction)Destroy, METH_NOARGS, 0},
+	{"GetSize", (PyCFunction)GetSize, METH_NOARGS, 0},
+	{"GetTime", (PyCFunction)GetTime, METH_NOARGS, 0},
+	{"GetTimeDelta", (PyCFunction)GetTimeDelta, METH_NOARGS, 0},
+	{"GetMouse", (PyCFunction)GetMouse, METH_NOARGS, 0},
+	{"GetText", (PyCFunction)GetText, METH_NOARGS, 0},
+	{"KeyPressed", (PyCFunction)KeyPressed, METH_VARARGS, 0},
+	{"KeyDown", (PyCFunction)KeyDown, METH_VARARGS, 0},
+	{"KeyReleased", (PyCFunction)KeyReleased, METH_VARARGS, 0},
+	{"KeyUp", (PyCFunction)KeyUp, METH_VARARGS, 0},
 	{0, 0},
 };
 
