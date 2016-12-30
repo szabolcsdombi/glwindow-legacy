@@ -193,19 +193,15 @@ PyObject * Init(PyObject * self, PyObject * args, PyObject * kwargs) {
 
 	int style = WS_POPUP;
 
-	// if (debug) {
-	// 	style |= WS_CLIPCHILDREN;
-	// }
-
 	hwnd = CreateWindowEx(
 		0,									// exStyle
 		L"GLWindow",						// lpClassName
 		0,									// lpWindowName
 		style,								// dwStyle
-		0,									// x
-		0,									// y
-		window_width,						// nWidth
-		window_height - (debug ? 1 : 0),	// nHeight
+		(debug ? 10 : 0),					// x
+		(debug ? 10 : 0),					// y
+		window_width - (debug ? 20 : 0),	// nWidth
+		window_height - (debug ? 20 : 0),	// nHeight
 		0,									// hWndParent
 		0,									// hMenu
 		hinst,								// hInstance
@@ -259,10 +255,6 @@ PyObject * Update(PyObject * self) {
 		SetForegroundWindow(hwnd);
 		SetActiveWindow(hwnd);
 		SetFocus(hwnd);
-
-		// if (debug) {
-		// 	SetParent(GetConsoleWindow(), hwnd);
-		// }
 
 		window_visible = true;
 	}
