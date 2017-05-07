@@ -1,0 +1,46 @@
+{
+    "version": "0.1.0",
+    "showOutput": "always",
+    "tasks": [
+        {
+            "taskName": "1. Make",
+            "command": "make",
+            "args": ["-j4"],
+            "isBuildCommand": true,
+            "isShellCommand": true
+        },
+        {
+            "taskName": "2. Clean",
+            "command": "make",
+            "args": ["clean"],
+            "isShellCommand": true
+        },
+        {
+            "taskName": "3. Run",
+            "command": "make",
+            "args": ["run"],
+            "isShellCommand": true
+        },
+        {
+            "taskName": "4. Test",
+            "command": "make",
+            "args": ["test"],
+			"isTestCommand": true,
+            "isShellCommand": true
+        },
+        {
+            "taskName": "5. Python",
+            "command": "start",
+            "args": ["cmd /k python ${file}"],
+    		"showOutput": "never",
+            "isShellCommand": true
+        },
+        {
+            "taskName": "6. Start",
+            "command": "start",
+            "args": ["cmd /k make Run"],
+    		"showOutput": "never",
+            "isShellCommand": true
+        }
+    ]
+}
