@@ -209,6 +209,7 @@ class Window:
 
 		return self.wnd.time
 
+
 	@property
 	def text_input(self):
 		'''
