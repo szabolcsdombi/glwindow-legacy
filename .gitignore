@@ -1,16 +1,17 @@
-__pycache__
+**/__pycache__
 
-Bin
-Temp
+**/Bin
+**/Temp
 
-build
-dist
+**/build
+**/dist
 
 files.txt
 GLWindow.egg-info
 MANIFEST
 
 Makefile
-Clean.py
 
 *.bat
+*.pyd
+*.pyc

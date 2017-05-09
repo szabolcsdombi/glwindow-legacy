@@ -1,22 +1,17 @@
 from setuptools import setup, Extension
 
-try:
-	from Development import cccompiler
-except ImportError:
-	pass
-
 GLWindow = Extension(
 	'GLWindow.GLWindow',
 	libraries = ['User32', 'opengl32', 'gdi32'],
 	sources = [
-		'Source/GLWindow.cpp',
-		'Source/ModernContext.cpp',
+		'src/GLWindow.cpp',
+		'src/ModernContext.cpp',
 	]
 )
 
 setup(
 	name = 'GLWindow',
-	version = '1.1.4',
+	version = '2.0.2',
 	description = 'GLWindow',
 	url = 'https://github.com/cprogrammer1994/GLWindow',
 	author = 'Szabolcs Dombi',

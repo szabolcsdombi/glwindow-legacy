@@ -1,1 +1,2 @@
-include Source/ModernContext.hpp
+recursive-include Source *.cpp *.hpp
+include README.md
