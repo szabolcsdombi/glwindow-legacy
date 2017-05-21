@@ -1,208 +1,227 @@
+'''
+    GLWindow
+
+    Examples:
+
+        A Simple window::
+
+            import GLWindow
+
+            wnd = GLWindow.create_window()
+
+            # Initialize Scene
+
+            while wnd.update():
+                # Render Scene
+'''
+
+
+from typing import Tuple
+
 from GLWindow import GLWindow
 from GLWindow import keys
 
 
 class Window:
-	'''
-		Window
-	'''
+    '''
+        Window
+    '''
 
-	def __init__(self, width = None, height = None, samples = 16, fullscreen = False, title = None):
-		self.wnd = GLWindow.create_window(width, height, samples, fullscreen, title)
+    def __init__(self):
+        self.wnd = None
+        raise Exception('Call create_window()')
 
-	def fullscreen(self):
-		'''
-			fullscreen()
+    def fullscreen(self) -> None:
+        '''
+            set the window to fullscreen mode
+        '''
 
-			set the window to fullscreen mode
-		'''
+        self.wnd.fullscreen()
 
-		self.wnd.fullscreen()
+    def windowed(self, width, height) -> None:
+        '''
+            set the window to windowed mode
+        '''
 
-	def windowed(self, width, height):
-		'''
-			windowed(width, height)
+        self.wnd.windowed(width, height)
 
-			set the window to windowed mode
-		'''
+    def update(self) -> None:
+        '''
+            process window events
+            swap buffers
+            update key states
+        '''
 
-		self.wnd.windowed(width, height)
+        return self.wnd.update()
 
-	def update(self):
-		'''
-			update()
+    def make_current(self) -> None:
+        '''
+            activate the opengl context associated with the window
+        '''
 
-			process window events
-			swap buffers
-			update key states
-		'''
+        self.wnd.make_current()
 
-		return self.wnd.update()
+    def swap_buffers(self) -> None:
+        '''
+            manually swap buffers
+        '''
 
-	def make_current(self):
-		'''
-			make_current()
+        self.wnd.swap_buffers()
 
-			activate the opengl context associated with the window
-		'''
+    def key_pressed(self, key) -> bool:
+        '''
+            Is the key pressed?
 
-		self.wnd.make_current()
+            Args:
+                key (int or str): The key or keycode.
 
-	def swap_buffers(self):
-		'''
-			make_current()
+            Returns:
+                bool: Is the key pressed?
+        '''
 
-			manually swap buffers
-		'''
+        return self.wnd.key_pressed(key)
 
-		self.wnd.swap_buffers()
+    def key_down(self, key) -> bool:
+        '''
+            Is the key down?
 
-	def key_pressed(self, key):
-		'''
-			key_pressed(key)
-		'''
+            Args:
+                key (int or str): The key or keycode.
 
-		return self.wnd.key_pressed(key)
+            Returns:
+                bool: Is the key down?
+        '''
 
-	def key_down(self, key):
-		'''
-			key_down(key)
-		'''
+        return self.wnd.key_down(key)
 
-		return self.wnd.key_down(key)
+    def key_released(self, key) -> bool:
+        '''
+            Is the key released?
 
-	def key_released(self, key):
-		'''
-			key_released(key)
-		'''
+            Args:
+                key (int or str): The key or keycode.
 
-		return self.wnd.key_released(key)
+            Returns:
+                bool: Is the key released?
+        '''
 
-	def key_up(self, key):
-		'''
-			key_up(key)
-		'''
+        return self.wnd.key_released(key)
 
-		return self.wnd.key_up(key)
+    def key_up(self, key) -> bool:
+        '''
+            Is the key up?
 
-	def set_icon(self, filename):
-		'''
-			set_icon(filename)
+            Args:
+                key (int or str): The key or keycode.
 
-			set the window icon
-			to set the small icon use ::py:method:`~Window.set_small_icon` instead
-		'''
+            Returns:
+                bool: Is the key up?
+        '''
 
-		self.wnd.set_icon(filename)
+        return self.wnd.key_up(key)
 
-	def set_small_icon(self, filename):
-		'''
-			set_small_icon(filename)
+    def set_icon(self, filename):
+        '''
+            set the window icon
+            to set the small icon use :py:meth:`~Window.set_small_icon` instead
+        '''
 
-			set the small window icon
-			to set the large icon use ::py:method:`~Window.set_icon` instead
-		'''
+        self.wnd.set_icon(filename)
 
-		self.wnd.set_small_icon(filename)
+    def set_small_icon(self, filename):
+        '''
+            set the small window icon
+            to set the large icon use :py:meth:`~Window.set_icon` instead
+        '''
 
-	def grab_mouse(self, grab):
-		'''
-			grab_mouse(grab)
+        self.wnd.set_small_icon(filename)
 
-			lock the mouse to the center of the window
-			use the mouse or mouse_delta to get the mouse position
-		'''
+    def grab_mouse(self, grab):
+        '''
+            lock the mouse to the center of the window
+            use the :py:attr:`mouse` or :py:attr:`mouse_delta` to get the mouse position
+        '''
 
-		self.wnd.grab_mouse(grab)
+        self.wnd.grab_mouse(grab)
 
-	@property
-	def mouse(self):
-		'''
-			mouse
+    @property
+    def mouse(self) -> Tuple[int, int]:
+        '''
+            tuple: The mouse of the window
+        '''
 
-			mouse of the window
-		'''
+        return self.wnd.mouse
 
-		return self.wnd.mouse
+    @property
+    def mouse_delta(self) -> Tuple[int, int]:
+        '''
+            tuple: The mouse_delta of the window
+        '''
 
-	@property
-	def mouse_delta(self):
-		'''
-			mouse_delta
+        return self.wnd.mouse_delta
 
-			mouse_delta of the window
-		'''
+    @property
+    def size(self) -> Tuple[int, int]:
+        '''
+            tuple: size of the window
+        '''
 
-		return self.wnd.mouse_delta
+        return self.wnd.size
 
-	@property
-	def size(self):
-		'''
-			size
+    @property
+    def viewport(self) -> Tuple[int, int, int, int]:
+        '''
+            tuple: viewport of the window
+        '''
 
-			size of the window
-		'''
+        return self.wnd.viewport
 
-		return self.wnd.size
+    @property
+    def title(self) -> str:
+        '''
+            str: title of the window
+        '''
 
-	@property
-	def viewport(self):
-		'''
-			viewport
+        raise NotImplementedError()
 
-			viewport of the window
-		'''
+    @title.setter
+    def title(self, value):
+        self.wnd.title = value
 
-		return self.wnd.viewport
+    @property
+    def vsync(self) -> bool:
+        '''
+            bool: vsync
+        '''
 
-	@property
-	def title(self):
-		'''
-			title
+        return self.wnd.vsync
 
-			title of the window
-		'''
+    @vsync.setter
+    def vsync(self, value):
+        self.wnd.vsync = value
 
-		raise NotImplementedError()
+    @property
+    def time(self) -> float:
+        '''
+            float: time
+        '''
 
-	@title.setter
-	def title(self, value):
-		self.wnd.title = value
+        return self.wnd.time
 
-	@property
-	def vsync(self):
-		'''
-			vsync
-		'''
+    @property
+    def text_input(self) -> str:
+        '''
+            str: text_input
+        '''
 
-		return self.wnd.vsync
-
-	@vsync.setter
-	def vsync(self, value):
-		self.wnd.vsync = value
-
-	@property
-	def time(self):
-		'''
-			time
-		'''
-
-		return self.wnd.time
-
-	@property
-	def text_input(self):
-		'''
-			text_input
-		'''
-
-		return self.wnd.text_input
+        return self.wnd.text_input
 
 
-def create_window(width = None, height = None, samples = 16, fullscreen = False, title = None):
-	'''
-		create_window(width, height, samples = 16, fullscreen = False, title = None)
+def create_window(width=None, height=None, samples=16, *, fullscreen=False, title=None) -> Window:
+    '''
+        create the main window
+    '''
 
-		create the main window
-	'''
-
-	return Window(width, height, samples, fullscreen, title)
+    window = Window.__new__(Window)
+    window.wnd = GLWindow.create_window(width, height, samples, fullscreen, title)
+    return window
