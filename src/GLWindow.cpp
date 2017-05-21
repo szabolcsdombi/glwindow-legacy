@@ -183,7 +183,7 @@ PyObject * Window_update(Window * self) {
 				POINT mouse;
 				GetCursorPos(&mouse);
 				self->mouse_delta_x = mouse.x - cx;
-				self->mouse_delta_y = mouse.y - cy;
+				self->mouse_delta_y = cy - mouse.y;
 				SetCursorPos(cx, cy);
 			} else {
 				self->mouse_delta_x = 0;
@@ -593,11 +593,13 @@ PyMethodDef Window_tp_methods[] = {
 };
 
 PyObject * Window_get_mouse(Window * self, void * closure) {
+	RECT rect;
 	POINT mouse;
 	GetCursorPos(&mouse);
 	ScreenToClient(self->hwnd, &mouse);
+	GetClientRect(self->hwnd, &rect);
 	PyObject * x = PyLong_FromLong(mouse.x);
-	PyObject * y = PyLong_FromLong(mouse.y);
+	PyObject * y = PyLong_FromLong(rect.bottom - rect.top - mouse.y - 1);
 	return PyTuple_Pack(2, x, y);
 }
 

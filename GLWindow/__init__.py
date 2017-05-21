@@ -81,7 +81,7 @@ class Window:
                 key (int or str): The key or keycode.
 
             Returns:
-                bool: Is the key pressed?
+                bool: True if the key is pressed, otherwise False
         '''
 
         return self.wnd.key_pressed(key)
@@ -94,7 +94,7 @@ class Window:
                 key (int or str): The key or keycode.
 
             Returns:
-                bool: Is the key down?
+                bool: True if the key is down, otherwise False
         '''
 
         return self.wnd.key_down(key)
@@ -107,7 +107,7 @@ class Window:
                 key (int or str): The key or keycode.
 
             Returns:
-                bool: Is the key released?
+                bool: True if the key is released, otherwise False
         '''
 
         return self.wnd.key_released(key)
@@ -120,7 +120,7 @@ class Window:
                 key (int or str): The key or keycode.
 
             Returns:
-                bool: Is the key up?
+                bool: True if the key is up, otherwise False
         '''
 
         return self.wnd.key_up(key)
@@ -152,7 +152,7 @@ class Window:
     @property
     def mouse(self) -> Tuple[int, int]:
         '''
-            tuple: The mouse of the window
+            tuple: The mouse of the window.
         '''
 
         return self.wnd.mouse
