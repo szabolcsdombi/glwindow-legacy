@@ -1,7 +1,7 @@
 from setuptools import setup, Extension
 
 GLWindow = Extension(
-	'GLWindow.GLWindow',
+	'GLWindow.glwnd',
 	libraries = ['User32', 'opengl32', 'gdi32'],
 	sources = [
 		'src/GLWindow.cpp',

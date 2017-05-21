@@ -19,7 +19,7 @@
 from typing import Tuple
 
 try:
-    from GLWindow import GLWindow
+    from GLWindow import glwnd
 
 except ImportError:
     pass
@@ -222,11 +222,18 @@ class Window:
         return self.wnd.text_input
 
 
+if False:
+    def glwnd_create_window(width, height, samples, fullscreen, title) -> Window:
+        return Window()
+    
+    glwnd.create_window = glwnd_create_window
+
+
 def create_window(width=None, height=None, samples=16, *, fullscreen=False, title=None) -> Window:
     '''
         create the main window
     '''
 
     window = Window.__new__(Window)
-    window.wnd = GLWindow.create_window(width, height, samples, fullscreen, title)
+    window.wnd = glwnd.create_window(width, height, samples, fullscreen, title)
     return window

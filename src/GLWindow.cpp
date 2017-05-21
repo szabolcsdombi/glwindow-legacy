@@ -65,7 +65,7 @@ int Window_tp_init(Window * self, PyObject * args, PyObject * kwargs) {
 }
 
 PyObject * Window_tp_str(Window * self) {
-	return PyUnicode_FromFormat("<GLWindow.Window>");
+	return PyUnicode_FromFormat("<glwnd.Window>");
 }
 
 PyObject * Window_fullscreen(Window * self) {
@@ -721,7 +721,7 @@ const char * Window_tp_doc = R"(
 
 PyTypeObject Window_Type = {
 	PyVarObject_HEAD_INIT(0, 0)
-	"GLWindow.Window",                                      // tp_name
+	"glwnd.Window",                                      // tp_name
 	sizeof(Window),                                         // tp_basicsize
 	0,                                                      // tp_itemsize
 	(destructor)Window_tp_dealloc,                          // tp_dealloc
@@ -995,7 +995,7 @@ PyMethodDef methods[] = {
 
 PyModuleDef moduledef = {
 	PyModuleDef_HEAD_INIT,
-	"GLWindow",
+	"glwnd",
 	0,
 	-1,
 	methods,
@@ -1018,15 +1018,15 @@ PyObject * InitializeGLWindow(PyObject * module) {
 	return module;
 }
 
-extern "C" PyObject * PyInit_GLWindow() {
+extern "C" PyObject * PyInit_glwnd() {
 	module = PyModule_Create(&moduledef);
 	return InitializeGLWindow(module);
 }
 
 #else
 
-extern "C" PyObject * initGLWindow() {
-	module = Py_InitModule("GLWindow", methods);
+extern "C" PyObject * initglwnd() {
+	module = Py_InitModule("glwnd", methods);
 	return InitializeGLWindow(module);
 }
 
