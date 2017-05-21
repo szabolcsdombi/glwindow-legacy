@@ -918,10 +918,12 @@ PyObject * meth_create_window(PyObject * self, PyObject * args, PyObject * kwarg
 	window->hrc = CreateModernContext(window->hdc, samples);
 
 	if (!window->hrc) {
+		PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
 		return 0;
 	}
 
 	if (!wglMakeCurrent(window->hdc, window->hrc)) {
+		PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
 		return 0;
 	}
 
