@@ -27,6 +27,11 @@ except ImportError:
 from GLWindow import keys
 
 
+__all__ = [
+    'Window', 'create_window', 'keys',
+]
+
+
 class Window:
     '''
         Window
@@ -224,8 +229,12 @@ class Window:
 
 if False:
     def glwnd_create_window(width, height, samples, fullscreen, title) -> Window:
+        '''
+            glwnd_create_window
+        '''
+
         return Window()
-    
+
     glwnd.create_window = glwnd_create_window
 
 
