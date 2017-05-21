@@ -11,7 +11,7 @@ GLWindow = Extension(
 
 setup(
 	name = 'GLWindow',
-	version = '2.0.2',
+	version = '2.0.3',
 	description = 'GLWindow',
 	url = 'https://github.com/cprogrammer1994/GLWindow',
 	author = 'Szabolcs Dombi',

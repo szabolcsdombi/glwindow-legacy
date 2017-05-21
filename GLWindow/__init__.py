@@ -1,5 +1,6 @@
-from . import GLWindow
-from . import keys
+from GLWindow import GLWindow
+from GLWindow import keys
+
 
 class Window:
 	'''
@@ -8,7 +9,6 @@ class Window:
 
 	def __init__(self, width = None, height = None, samples = 16, fullscreen = False, title = None):
 		self.wnd = GLWindow.create_window(width, height, samples, fullscreen, title)
-
 
 	def fullscreen(self):
 		'''
@@ -19,7 +19,6 @@ class Window:
 
 		self.wnd.fullscreen()
 
-
 	def windowed(self, width, height):
 		'''
 			windowed(width, height)
@@ -28,7 +27,6 @@ class Window:
 		'''
 
 		self.wnd.windowed(width, height)
-
 
 	def update(self):
 		'''
@@ -41,7 +39,6 @@ class Window:
 
 		return self.wnd.update()
 
-
 	def make_current(self):
 		'''
 			make_current()
@@ -50,7 +47,6 @@ class Window:
 		'''
 
 		self.wnd.make_current()
-
 
 	def swap_buffers(self):
 		'''
@@ -61,14 +57,12 @@ class Window:
 
 		self.wnd.swap_buffers()
 
-
 	def key_pressed(self, key):
 		'''
 			key_pressed(key)
 		'''
 
 		return self.wnd.key_pressed(key)
-
 
 	def key_down(self, key):
 		'''
@@ -77,7 +71,6 @@ class Window:
 
 		return self.wnd.key_down(key)
 
-
 	def key_released(self, key):
 		'''
 			key_released(key)
@@ -85,14 +78,12 @@ class Window:
 
 		return self.wnd.key_released(key)
 
-
 	def key_up(self, key):
 		'''
 			key_up(key)
 		'''
 
 		return self.wnd.key_up(key)
-
 
 	def set_icon(self, filename):
 		'''
@@ -104,7 +95,6 @@ class Window:
 
 		self.wnd.set_icon(filename)
 
-
 	def set_small_icon(self, filename):
 		'''
 			set_small_icon(filename)
@@ -114,7 +104,6 @@ class Window:
 		'''
 
 		self.wnd.set_small_icon(filename)
-
 
 	def grab_mouse(self, grab):
 		'''
@@ -126,7 +115,6 @@ class Window:
 
 		self.wnd.grab_mouse(grab)
 
-
 	@property
 	def mouse(self):
 		'''
@@ -136,7 +124,6 @@ class Window:
 		'''
 
 		return self.wnd.mouse
-
 
 	@property
 	def mouse_delta(self):
@@ -148,7 +135,6 @@ class Window:
 
 		return self.wnd.mouse_delta
 
-
 	@property
 	def size(self):
 		'''
@@ -158,7 +144,6 @@ class Window:
 		'''
 
 		return self.wnd.size
-
 
 	@property
 	def viewport(self):
@@ -170,7 +155,6 @@ class Window:
 
 		return self.wnd.viewport
 
-
 	@property
 	def title(self):
 		'''
@@ -181,11 +165,9 @@ class Window:
 
 		raise NotImplementedError()
 
-
 	@title.setter
 	def title(self, value):
 		self.wnd.title = value
-
 
 	@property
 	def vsync(self):
@@ -195,11 +177,9 @@ class Window:
 
 		return self.wnd.vsync
 
-
 	@vsync.setter
 	def vsync(self, value):
 		self.wnd.vsync = value
-
 
 	@property
 	def time(self):
@@ -208,7 +188,6 @@ class Window:
 		'''
 
 		return self.wnd.time
-
 
 	@property
 	def text_input(self):
@@ -227,36 +206,3 @@ def create_window(width = None, height = None, samples = 16, fullscreen = False,
 	'''
 
 	return Window(width, height, samples, fullscreen, title)
-
-
-import warnings
-
-
-def Init(debug = False):
-	global window
-	window = create_window()
-	warnings.warn("deprecated", DeprecationWarning)
-
-def Update():
-	return window.update()
-
-def KeyPressed(key):
-	return window.key_pressed(key)
-
-def KeyDown(key):
-	return window.key_down(key)
-
-def KeyReleased(key):
-	return window.key_released(key)
-
-def KeyUp(key):
-	return window.key_up(key)
-
-def GetMouse():
-	return window.mouse + (0,)
-
-def GetSize():
-	return window.size
-
-def GetTime():
-	return window.time
