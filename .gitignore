@@ -10,7 +10,7 @@ files.txt
 GLWindow.egg-info
 MANIFEST
 
-Makefile
+.vscode
 
 *.bat
 *.pyd
