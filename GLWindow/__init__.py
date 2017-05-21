@@ -18,7 +18,12 @@
 
 from typing import Tuple
 
-from GLWindow import GLWindow
+try:
+    from GLWindow import GLWindow
+
+except ImportError:
+    pass
+
 from GLWindow import keys
 
 
