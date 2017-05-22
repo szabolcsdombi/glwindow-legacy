@@ -897,7 +897,7 @@ PyObject * meth_create_window(PyObject * self, PyObject * args, PyObject * kwarg
 		window->hinst,                        // hInstance
 		0,                                    // hIcon
 		(HCURSOR)LoadCursor(0, IDC_ARROW),    // hCursor
-		0, // (HBRUSH)COLOR_WINDOW,                 // hbrBackground
+		(HBRUSH)COLOR_WINDOW,                 // hbrBackground
 		0,                                    // lpszMenuName
 		L"GLWindow",                          // lpszClassName
 	};
