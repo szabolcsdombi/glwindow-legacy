@@ -44,9 +44,6 @@ def main():
     scale = prog.uniforms['scale']
     rotation = prog.uniforms['rotation']
 
-    width, height = wnd.size
-    scale.value = (height / width * 0.75, 0.75)
-
     vbo = ctx.buffer(struct.pack(
         '18f',
         1.0, 0.0, 1.0, 0.0, 0.0, 0.5,
@@ -57,6 +54,8 @@ def main():
     vao = ctx.simple_vertex_array(prog, vbo, ['vert', 'vert_color'])
 
     while wnd.update():
+        width, height = wnd.size
+        scale.value = (height / width * 0.75, 0.75)
         ctx.viewport = wnd.viewport
         ctx.clear(240, 240, 240)
         ctx.enable(ModernGL.BLEND)
