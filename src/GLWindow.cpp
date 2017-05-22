@@ -3,6 +3,8 @@
 #define UNICODE
 #include <Windows.h>
 
+extern "C" void WINAPI glViewport(int x, int y, int width, int height);
+
 #include "ModernContext.hpp"
 
 typedef void (WINAPI * wglSwapIntervalProc)(int interval);
@@ -84,6 +86,8 @@ PyObject * Window_fullscreen(Window * self) {
 	SetActiveWindow(self->hwnd);
 	SetFocus(self->hwnd);
 
+	glViewport(0, 0, self->adjusted_width, self->adjusted_height);
+
 	Py_RETURN_NONE;
 }
 
@@ -130,6 +134,8 @@ PyObject * Window_windowed(Window * self, PyObject * args, PyObject * kwargs) {
 	SetForegroundWindow(self->hwnd);
 	SetActiveWindow(self->hwnd);
 	SetFocus(self->hwnd);
+
+	glViewport(0, 0, width, height);
 
 	Py_RETURN_NONE;
 }
