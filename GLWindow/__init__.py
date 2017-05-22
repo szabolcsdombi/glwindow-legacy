@@ -234,7 +234,7 @@ if False:
             glwnd_create_window
         '''
 
-        return Window()
+        return Window(*args)
 
     glwnd.create_window = glwnd_create_window
 
