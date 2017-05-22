@@ -244,6 +244,12 @@ def create_window(width=None, height=None, samples=16, *, fullscreen=False, titl
         create the main window
     '''
 
+    if samples < 0 or (samples & (samples - 1)) != 0:
+        raise Exception('Invalid number of samples: %d' % samples)
+    
+    if (width is None) ^ (height is None):
+        raise Exception('Error width = %r and height = %r' % (width, height))
+
     window = Window.__new__(Window)
     window.wnd = glwnd.create_window(width, height, samples, fullscreen, title)
     return window
