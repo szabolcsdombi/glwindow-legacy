@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - Render hang when alt key pressed.
+- Bypassing maximize using the menu.
 
 ## [2.0.3] - 2017-05-21
 
