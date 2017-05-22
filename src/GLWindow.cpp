@@ -88,16 +88,12 @@ PyObject * Window_fullscreen(Window * self) {
 }
 
 PyObject * Window_windowed(Window * self, PyObject * args, PyObject * kwargs) {
-	static const char * kwlist[] = {"width", "height", 0};
+	int width;
+	int height;
 
-	int width = 0;
-	int height = 0;
-
-	int args_ok = PyArg_ParseTupleAndKeywords(
+	int args_ok = PyArg_ParseTuple(
 		args,
-		kwargs,
-		"ii",
-		(char **)kwlist,
+		"II",
 		&width,
 		&height
 	);
@@ -281,22 +277,17 @@ PyObject * Window_make_current(Window * self) {
 	return 0;
 }
 
-
 PyObject * Window_swap_buffers(Window * self) {
 	SwapBuffers(self->hdc);
 	Py_RETURN_NONE;
 }
 
 PyObject * Window_grab_mouse(Window * self, PyObject * args, PyObject * kwargs) {
-	static const char * kwlist[] = {"grab", 0};
-
 	int grab;
 
-	int args_ok = PyArg_ParseTupleAndKeywords(
+	int args_ok = PyArg_ParseTuple(
 		args,
-		kwargs,
 		"p",
-		(char **)kwlist,
 		&grab
 	);
 
@@ -322,15 +313,11 @@ PyObject * Window_grab_mouse(Window * self, PyObject * args, PyObject * kwargs) 
 }
 
 PyObject * Window_key_pressed(Window * self, PyObject * args, PyObject * kwargs) {
-	static const char * kwlist[] = {"key", 0};
+	PyObject * key;
 
-	PyObject * key = 0;
-
-	int args_ok = PyArg_ParseTupleAndKeywords(
+	int args_ok = PyArg_ParseTuple(
 		args,
-		kwargs,
 		"O",
-		(char **)kwlist,
 		&key
 	);
 
@@ -359,15 +346,11 @@ PyObject * Window_key_pressed(Window * self, PyObject * args, PyObject * kwargs)
 }
 
 PyObject * Window_key_down(Window * self, PyObject * args, PyObject * kwargs) {
-	static const char * kwlist[] = {"key", 0};
+	PyObject * key;
 
-	PyObject * key = 0;
-
-	int args_ok = PyArg_ParseTupleAndKeywords(
+	int args_ok = PyArg_ParseTuple(
 		args,
-		kwargs,
 		"O",
-		(char **)kwlist,
 		&key
 	);
 
@@ -396,15 +379,11 @@ PyObject * Window_key_down(Window * self, PyObject * args, PyObject * kwargs) {
 }
 
 PyObject * Window_key_released(Window * self, PyObject * args, PyObject * kwargs) {
-	static const char * kwlist[] = {"key", 0};
+	PyObject * key;
 
-	PyObject * key = 0;
-
-	int args_ok = PyArg_ParseTupleAndKeywords(
+	int args_ok = PyArg_ParseTuple(
 		args,
-		kwargs,
 		"O",
-		(char **)kwlist,
 		&key
 	);
 
@@ -433,15 +412,11 @@ PyObject * Window_key_released(Window * self, PyObject * args, PyObject * kwargs
 }
 
 PyObject * Window_key_up(Window * self, PyObject * args, PyObject * kwargs) {
-	static const char * kwlist[] = {"key", 0};
+	PyObject * key;
 
-	PyObject * key = 0;
-
-	int args_ok = PyArg_ParseTupleAndKeywords(
+	int args_ok = PyArg_ParseTuple(
 		args,
-		kwargs,
 		"O",
-		(char **)kwlist,
 		&key
 	);
 
@@ -470,15 +445,11 @@ PyObject * Window_key_up(Window * self, PyObject * args, PyObject * kwargs) {
 }
 
 PyObject * Window_set_icon(Window * self, PyObject * args, PyObject * kwargs) {
-	static const char * kwlist[] = {"filename", 0};
-
 	PyObject * filename;
 
-	int args_ok = PyArg_ParseTupleAndKeywords(
+	int args_ok = PyArg_ParseTuple(
 		args,
-		kwargs,
 		"O!",
-		(char **)kwlist,
 		&PyUnicode_Type,
 		&filename
 	);
@@ -501,15 +472,11 @@ PyObject * Window_set_icon(Window * self, PyObject * args, PyObject * kwargs) {
 }
 
 PyObject * Window_set_small_icon(Window * self, PyObject * args, PyObject * kwargs) {
-	static const char * kwlist[] = {"filename", 0};
-
 	PyObject * filename;
 
-	int args_ok = PyArg_ParseTupleAndKeywords(
+	int args_ok = PyArg_ParseTuple(
 		args,
-		kwargs,
 		"O!",
-		(char **)kwlist,
 		&PyUnicode_Type,
 		&filename
 	);
@@ -533,17 +500,17 @@ PyObject * Window_set_small_icon(Window * self, PyObject * args, PyObject * kwar
 
 PyMethodDef Window_tp_methods[] = {
 	{"fullscreen", (PyCFunction)Window_fullscreen, METH_NOARGS, 0},
-	{"windowed", (PyCFunction)Window_windowed, METH_VARARGS | METH_KEYWORDS, 0},
+	{"windowed", (PyCFunction)Window_windowed, METH_VARARGS, 0},
 	{"update", (PyCFunction)Window_update, METH_NOARGS, 0},
 	{"make_current", (PyCFunction)Window_make_current, METH_NOARGS, 0},
 	{"swap_buffers", (PyCFunction)Window_swap_buffers, METH_NOARGS, 0},
-	{"key_pressed", (PyCFunction)Window_key_pressed, METH_VARARGS | METH_KEYWORDS, 0},
-	{"key_down", (PyCFunction)Window_key_down, METH_VARARGS | METH_KEYWORDS, 0},
-	{"key_released", (PyCFunction)Window_key_released, METH_VARARGS | METH_KEYWORDS, 0},
-	{"key_up", (PyCFunction)Window_key_up, METH_VARARGS | METH_KEYWORDS, 0},
-	{"grab_mouse", (PyCFunction)Window_grab_mouse, METH_VARARGS | METH_KEYWORDS, 0},
-	{"set_icon", (PyCFunction)Window_set_icon, METH_VARARGS | METH_KEYWORDS, 0},
-	{"set_small_icon", (PyCFunction)Window_set_small_icon, METH_VARARGS | METH_KEYWORDS, 0},
+	{"key_pressed", (PyCFunction)Window_key_pressed, METH_VARARGS, 0},
+	{"key_down", (PyCFunction)Window_key_down, METH_VARARGS, 0},
+	{"key_released", (PyCFunction)Window_key_released, METH_VARARGS, 0},
+	{"key_up", (PyCFunction)Window_key_up, METH_VARARGS, 0},
+	{"grab_mouse", (PyCFunction)Window_grab_mouse, METH_VARARGS, 0},
+	{"set_icon", (PyCFunction)Window_set_icon, METH_VARARGS, 0},
+	{"set_small_icon", (PyCFunction)Window_set_small_icon, METH_VARARGS, 0},
 	{0},
 };
 
@@ -639,10 +606,6 @@ PyGetSetDef Window_tp_getseters[] = {
 	{(char *)"text_input", (getter)Window_get_text_input, 0, 0, 0},
 	{0},
 };
-
-const char * 0 = R"(
-	Window
-)";
 
 PyTypeObject Window_Type = {
 	PyVarObject_HEAD_INIT(0, 0)
@@ -765,19 +728,15 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 }
 
 PyObject * meth_create_window(PyObject * self, PyObject * args, PyObject * kwargs) {
-	static const char * kwlist[] = {"width", "height", "samples", "fullscreen", "title", 0};
+	PyObject * width;
+	PyObject * height;
+	int samples;
+	int fullscreen;
+	PyObject * title;
 
-	PyObject * width = Py_None;
-	PyObject * height = Py_None;
-	int samples = 16;
-	int fullscreen = false;
-	PyObject * title = Py_None;
-
-	int args_ok = PyArg_ParseTupleAndKeywords(
+	int args_ok = PyArg_ParseTuple(
 		args,
-		kwargs,
-		"|OOIpO",
-		(char **)kwlist,
+		"OOIpO",
 		&width,
 		&height,
 		&samples,
@@ -930,7 +889,7 @@ PyObject * meth_create_window(PyObject * self, PyObject * args, PyObject * kwarg
 }
 
 PyMethodDef methods[] = {
-	{"create_window", (PyCFunction)meth_create_window, METH_VARARGS | METH_KEYWORDS, 0},
+	{"create_window", (PyCFunction)meth_create_window, METH_VARARGS, 0},
 	{0},
 };
 
