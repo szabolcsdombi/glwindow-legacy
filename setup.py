@@ -1,5 +1,11 @@
 from setuptools import setup, Extension
 
+long_description = '''
+`GLWindow on github <https://github.com/cprogrammer1994/GLWindow>`_
+
+`Documentation <https://glwindow.github.io/>`_
+'''
+
 GLWindow = Extension(
 	'GLWindow.glwnd',
 	libraries = ['User32', 'opengl32', 'gdi32'],
@@ -11,8 +17,9 @@ GLWindow = Extension(
 
 setup(
 	name = 'GLWindow',
-	version = '2.0.3',
+	version = '2.0.4',
 	description = 'GLWindow',
+	long_description = long_description.strip(),
 	url = 'https://github.com/cprogrammer1994/GLWindow',
 	author = 'Szabolcs Dombi',
 	author_email = 'cprogrammer1994@gmail.com',
