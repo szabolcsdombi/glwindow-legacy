@@ -10,5 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [2.0.3] - 2017-05-21
 
+## 1.0.0 - 2016-08-29
+
 [Unreleased]: https://github.com/cprogrammer1994/GLWindow/compare/2.0.3...master
 [2.0.3]: https://github.com/cprogrammer1994/GLWindow/tree/2.0.3
