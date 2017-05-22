@@ -19,5 +19,6 @@ setup(
 	license = 'MIT',
 	packages = ['GLWindow'],
 	ext_modules = [GLWindow],
+	install_requires = ['ModernGL'],
 	platforms = ['win32', 'win64']
 )
