@@ -15,6 +15,7 @@
                 # Render Scene
 '''
 
+# pylint: disable=using-constant-test
 
 from typing import Tuple
 
@@ -228,7 +229,7 @@ class Window:
 
 
 if False:
-    def glwnd_create_window(width, height, samples, fullscreen, title) -> Window:
+    def glwnd_create_window(*args) -> Window:
         '''
             glwnd_create_window
         '''
