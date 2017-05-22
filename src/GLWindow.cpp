@@ -23,6 +23,9 @@ struct Window {
 	HDC hdc;
 	HGLRC hrc;
 
+	int adjusted_width;
+	int adjusted_height;
+
 	long long timer_counter;
 	long long timer_frequency;
 
@@ -69,12 +72,12 @@ PyObject * Window_tp_str(Window * self) {
 }
 
 PyObject * Window_fullscreen(Window * self) {
-	int sw = GetSystemMetrics(SM_CXSCREEN);
-	int sh = GetSystemMetrics(SM_CYSCREEN);
+	self->adjusted_width = GetSystemMetrics(SM_CXSCREEN);
+	self->adjusted_height = GetSystemMetrics(SM_CYSCREEN);
 
 	SetWindowLong(self->hwnd, GWL_EXSTYLE, 0);
 	SetWindowLong(self->hwnd, GWL_STYLE, WS_POPUP);
-	SetWindowPos(self->hwnd, HWND_TOP, 0, 0, sw, sh, 0);
+	SetWindowPos(self->hwnd, HWND_TOP, 0, 0, self->adjusted_width, self->adjusted_height, 0);
 	ShowWindow(self->hwnd, SW_SHOW);
 
 	SetForegroundWindow(self->hwnd);
@@ -117,11 +120,11 @@ PyObject * Window_windowed(Window * self, PyObject * args, PyObject * kwargs) {
 
 	AdjustWindowRect(&rect, style, 0);
 
-	int w = rect.right - rect.left;
-	int h = rect.bottom - rect.top;
+	self->adjusted_width = rect.right - rect.left;
+	self->adjusted_height = rect.bottom - rect.top;
 
-	int x = (sw - w) / 2;
-	int y = (sh - h) / 2;
+	int x = (sw - self->adjusted_width) / 2;
+	int y = (sh - self->adjusted_height) / 2;
 
 	if (y < 0) {
 		y = 0;
@@ -129,7 +132,7 @@ PyObject * Window_windowed(Window * self, PyObject * args, PyObject * kwargs) {
 
 	SetWindowLong(self->hwnd, GWL_EXSTYLE, WS_EX_DLGMODALFRAME);
 	SetWindowLong(self->hwnd, GWL_STYLE, style);
-	SetWindowPos(self->hwnd, HWND_TOP, x, y, w, h, 0);
+	SetWindowPos(self->hwnd, HWND_TOP, x, y, self->adjusted_width, self->adjusted_height, 0);
 	ShowWindow(self->hwnd, SW_SHOW);
 
 	SetForegroundWindow(self->hwnd);
@@ -723,7 +726,7 @@ const char * Window_tp_doc = R"(
 
 PyTypeObject Window_Type = {
 	PyVarObject_HEAD_INIT(0, 0)
-	"glwnd.Window",                                      // tp_name
+	"glwnd.Window",                                         // tp_name
 	sizeof(Window),                                         // tp_basicsize
 	0,                                                      // tp_itemsize
 	(destructor)Window_tp_dealloc,                          // tp_dealloc
@@ -768,6 +771,10 @@ Window * Window_New() {
 }
 
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+	if (!window) {
+		return DefWindowProc(hWnd, uMsg, wParam, lParam);
+	}
+
 	switch (uMsg) {
 		case WM_CLOSE: {
 			DestroyWindow(hWnd);
@@ -814,6 +821,14 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 				window->text_input[window->text_cursor++] = wParam & 0xFFFF;
 			}
 			break;
+		}
+		case WM_GETMINMAXINFO: {
+			MINMAXINFO * info = (MINMAXINFO *)lParam;
+			info->ptMinTrackSize.x = window->adjusted_width;
+			info->ptMinTrackSize.y = window->adjusted_height;
+			info->ptMaxTrackSize.x = window->adjusted_width;
+			info->ptMaxTrackSize.y = window->adjusted_height;
+			return 0;
 		}
 		case WM_SYSKEYDOWN:
 		case WM_SYSKEYUP: {
