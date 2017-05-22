@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Added
+- Sample program in *__main__.py*.
+
 ### Fixed
 - Render hang when alt key pressed.
 
