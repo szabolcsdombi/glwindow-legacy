@@ -87,10 +87,6 @@ PyObject * Window_fullscreen(Window * self) {
 	Py_RETURN_NONE;
 }
 
-const char * Window_fullscreen_doc = R"(
-	fullscreen()
-)";
-
 PyObject * Window_windowed(Window * self, PyObject * args, PyObject * kwargs) {
 	static const char * kwlist[] = {"width", "height", 0};
 
@@ -141,10 +137,6 @@ PyObject * Window_windowed(Window * self, PyObject * args, PyObject * kwargs) {
 
 	Py_RETURN_NONE;
 }
-
-const char * Window_windowed_doc = R"(
-	windowed(width, height)
-)";
 
 PyObject * Window_update(Window * self) {
 	SwapBuffers(self->hdc);
@@ -284,28 +276,16 @@ PyObject * Window_update(Window * self) {
 	return PyBool_FromLong(!destroyed);
 }
 
-const char * Window_update_doc = R"(
-	update()
-)";
-
 PyObject * Window_make_current(Window * self) {
 	PyErr_Format(PyExc_NotImplementedError, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
 	return 0;
 }
-
-const char * Window_make_current_doc = R"(
-	make_current()
-)";
 
 
 PyObject * Window_swap_buffers(Window * self) {
 	SwapBuffers(self->hdc);
 	Py_RETURN_NONE;
 }
-
-const char * Window_swap_buffers_doc = R"(
-	swap_buffers()
-)";
 
 PyObject * Window_grab_mouse(Window * self, PyObject * args, PyObject * kwargs) {
 	static const char * kwlist[] = {"grab", 0};
@@ -340,10 +320,6 @@ PyObject * Window_grab_mouse(Window * self, PyObject * args, PyObject * kwargs) 
 
 	Py_RETURN_NONE;
 }
-
-const char * Window_grab_mouse_doc = R"(
-	grab_mouse(grab)
-)";
 
 PyObject * Window_key_pressed(Window * self, PyObject * args, PyObject * kwargs) {
 	static const char * kwlist[] = {"key", 0};
@@ -382,10 +358,6 @@ PyObject * Window_key_pressed(Window * self, PyObject * args, PyObject * kwargs)
 	return PyBool_FromLong(self->key_state[keycode] == KEY_PRESSED);
 }
 
-const char * Window_key_pressed_doc = R"(
-	key_pressed(key)
-)";
-
 PyObject * Window_key_down(Window * self, PyObject * args, PyObject * kwargs) {
 	static const char * kwlist[] = {"key", 0};
 
@@ -422,10 +394,6 @@ PyObject * Window_key_down(Window * self, PyObject * args, PyObject * kwargs) {
 
 	return PyBool_FromLong(self->key_state[keycode] != KEY_UP);
 }
-
-const char * Window_key_down_doc = R"(
-	key_down(key)
-)";
 
 PyObject * Window_key_released(Window * self, PyObject * args, PyObject * kwargs) {
 	static const char * kwlist[] = {"key", 0};
@@ -464,10 +432,6 @@ PyObject * Window_key_released(Window * self, PyObject * args, PyObject * kwargs
 	return PyBool_FromLong(self->key_state[keycode] == KEY_RELEASED);
 }
 
-const char * Window_key_released_doc = R"(
-	key_released(key)
-)";
-
 PyObject * Window_key_up(Window * self, PyObject * args, PyObject * kwargs) {
 	static const char * kwlist[] = {"key", 0};
 
@@ -505,10 +469,6 @@ PyObject * Window_key_up(Window * self, PyObject * args, PyObject * kwargs) {
 	return PyBool_FromLong(self->key_state[keycode] == KEY_UP);
 }
 
-const char * Window_key_up_doc = R"(
-	key_up(key)
-)";
-
 PyObject * Window_set_icon(Window * self, PyObject * args, PyObject * kwargs) {
 	static const char * kwlist[] = {"filename", 0};
 
@@ -539,10 +499,6 @@ PyObject * Window_set_icon(Window * self, PyObject * args, PyObject * kwargs) {
 	SetClassLongPtr(self->hwnd, GCLP_HICON, (LONG_PTR)hicon);
 	Py_RETURN_NONE;
 }
-
-const char * Window_set_icon_doc = R"(
-	set_icon()
-)";
 
 PyObject * Window_set_small_icon(Window * self, PyObject * args, PyObject * kwargs) {
 	static const char * kwlist[] = {"filename", 0};
@@ -575,23 +531,19 @@ PyObject * Window_set_small_icon(Window * self, PyObject * args, PyObject * kwar
 	Py_RETURN_NONE;
 }
 
-const char * Window_set_small_icon_doc = R"(
-	set_small_icon()
-)";
-
 PyMethodDef Window_tp_methods[] = {
-	{"fullscreen", (PyCFunction)Window_fullscreen, METH_NOARGS, Window_fullscreen_doc},
-	{"windowed", (PyCFunction)Window_windowed, METH_VARARGS | METH_KEYWORDS, Window_windowed_doc},
-	{"update", (PyCFunction)Window_update, METH_NOARGS, Window_update_doc},
-	{"make_current", (PyCFunction)Window_make_current, METH_NOARGS, Window_make_current_doc},
-	{"swap_buffers", (PyCFunction)Window_swap_buffers, METH_NOARGS, Window_swap_buffers_doc},
-	{"key_pressed", (PyCFunction)Window_key_pressed, METH_VARARGS | METH_KEYWORDS, Window_key_pressed_doc},
-	{"key_down", (PyCFunction)Window_key_down, METH_VARARGS | METH_KEYWORDS, Window_key_down_doc},
-	{"key_released", (PyCFunction)Window_key_released, METH_VARARGS | METH_KEYWORDS, Window_key_released_doc},
-	{"key_up", (PyCFunction)Window_key_up, METH_VARARGS | METH_KEYWORDS, Window_key_up_doc},
-	{"grab_mouse", (PyCFunction)Window_grab_mouse, METH_VARARGS | METH_KEYWORDS, Window_grab_mouse_doc},
-	{"set_icon", (PyCFunction)Window_set_icon, METH_VARARGS | METH_KEYWORDS, Window_set_icon_doc},
-	{"set_small_icon", (PyCFunction)Window_set_small_icon, METH_VARARGS | METH_KEYWORDS, Window_set_small_icon_doc},
+	{"fullscreen", (PyCFunction)Window_fullscreen, METH_NOARGS, 0},
+	{"windowed", (PyCFunction)Window_windowed, METH_VARARGS | METH_KEYWORDS, 0},
+	{"update", (PyCFunction)Window_update, METH_NOARGS, 0},
+	{"make_current", (PyCFunction)Window_make_current, METH_NOARGS, 0},
+	{"swap_buffers", (PyCFunction)Window_swap_buffers, METH_NOARGS, 0},
+	{"key_pressed", (PyCFunction)Window_key_pressed, METH_VARARGS | METH_KEYWORDS, 0},
+	{"key_down", (PyCFunction)Window_key_down, METH_VARARGS | METH_KEYWORDS, 0},
+	{"key_released", (PyCFunction)Window_key_released, METH_VARARGS | METH_KEYWORDS, 0},
+	{"key_up", (PyCFunction)Window_key_up, METH_VARARGS | METH_KEYWORDS, 0},
+	{"grab_mouse", (PyCFunction)Window_grab_mouse, METH_VARARGS | METH_KEYWORDS, 0},
+	{"set_icon", (PyCFunction)Window_set_icon, METH_VARARGS | METH_KEYWORDS, 0},
+	{"set_small_icon", (PyCFunction)Window_set_small_icon, METH_VARARGS | METH_KEYWORDS, 0},
 	{0},
 };
 
@@ -606,19 +558,11 @@ PyObject * Window_get_mouse(Window * self, void * closure) {
 	return PyTuple_Pack(2, x, y);
 }
 
-char Window_mouse_doc[] = R"(
-	mouse
-)";
-
 PyObject * Window_get_mouse_delta(Window * self, void * closure) {
 	PyObject * x = PyLong_FromLong(self->mouse_delta_x);
 	PyObject * y = PyLong_FromLong(self->mouse_delta_y);
 	return PyTuple_Pack(2, x, y);
 }
-
-char Window_mouse_delta_doc[] = R"(
-	mouse_delta
-)";
 
 PyObject * Window_get_size(Window * self, void * closure) {
 	RECT rect;
@@ -627,10 +571,6 @@ PyObject * Window_get_size(Window * self, void * closure) {
 	PyObject * height = PyLong_FromLong(rect.bottom - rect.top);
 	return PyTuple_Pack(2, width, height);
 }
-
-char Window_size_doc[] = R"(
-	size
-)";
 
 PyObject * Window_get_viewport(Window * self, void * closure) {
 	RECT rect;
@@ -641,10 +581,6 @@ PyObject * Window_get_viewport(Window * self, void * closure) {
 	PyObject * height = PyLong_FromLong(rect.bottom - rect.top);
 	return PyTuple_Pack(4, x, y, width, height);
 }
-
-char Window_viewport_doc[] = R"(
-	viewport
-)";
 
 int Window_set_title(Window * self, PyObject * value, void * closure) {
 	if (Py_TYPE(value) != &PyUnicode_Type) {
@@ -658,10 +594,6 @@ int Window_set_title(Window * self, PyObject * value, void * closure) {
 
 	return 0;
 }
-
-char Window_title_doc[] = R"(
-	title
-)";
 
 PyObject * Window_get_vsync(Window * self, void * closure) {
 	PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
@@ -685,10 +617,6 @@ int Window_set_vsync(Window * self, PyObject * value, void * closure) {
 	return 0;
 }
 
-char Window_vsync_doc[] = R"(
-	vsync
-)";
-
 PyObject * Window_get_time(Window * self, void * closure) {
 	long long now;
 	QueryPerformanceCounter((LARGE_INTEGER *)&now);
@@ -696,31 +624,23 @@ PyObject * Window_get_time(Window * self, void * closure) {
 	return PyFloat_FromDouble(elapsed);
 }
 
-char Window_time_doc[] = R"(
-	time
-)";
-
 PyObject * Window_get_text_input(Window * self, void * closure) {
 	return PyUnicode_FromUnicode(self->text_input, self->text_input_size);
 }
 
-char Window_text_input_doc[] = R"(
-	text_input
-)";
-
 PyGetSetDef Window_tp_getseters[] = {
-	{(char *)"mouse", (getter)Window_get_mouse, 0, Window_mouse_doc, 0},
-	{(char *)"mouse_delta", (getter)Window_get_mouse_delta, 0, Window_mouse_delta_doc, 0},
-	{(char *)"size", (getter)Window_get_size, 0, Window_size_doc, 0},
-	{(char *)"viewport", (getter)Window_get_viewport, 0, Window_viewport_doc, 0},
-	{(char *)"title", 0, (setter)Window_set_title, Window_title_doc, 0},
-	{(char *)"vsync", (getter)Window_get_vsync, (setter)Window_set_vsync, Window_vsync_doc, 0},
-	{(char *)"time", (getter)Window_get_time, 0, Window_time_doc, 0},
-	{(char *)"text_input", (getter)Window_get_text_input, 0, Window_text_input_doc, 0},
+	{(char *)"mouse", (getter)Window_get_mouse, 0, 0, 0},
+	{(char *)"mouse_delta", (getter)Window_get_mouse_delta, 0, 0, 0},
+	{(char *)"size", (getter)Window_get_size, 0, 0, 0},
+	{(char *)"viewport", (getter)Window_get_viewport, 0, 0, 0},
+	{(char *)"title", 0, (setter)Window_set_title, 0, 0},
+	{(char *)"vsync", (getter)Window_get_vsync, (setter)Window_set_vsync, 0, 0},
+	{(char *)"time", (getter)Window_get_time, 0, 0, 0},
+	{(char *)"text_input", (getter)Window_get_text_input, 0, 0, 0},
 	{0},
 };
 
-const char * Window_tp_doc = R"(
+const char * 0 = R"(
 	Window
 )";
 
@@ -745,7 +665,7 @@ PyTypeObject Window_Type = {
 	0,                                                      // tp_setattro
 	0,                                                      // tp_as_buffer
 	Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,               // tp_flags
-	Window_tp_doc,                                          // tp_doc
+	0,                                                      // tp_doc
 	0,                                                      // tp_traverse
 	0,                                                      // tp_clear
 	0,                                                      // tp_richcompare
@@ -1009,12 +929,8 @@ PyObject * meth_create_window(PyObject * self, PyObject * args, PyObject * kwarg
 	return (PyObject *)window;
 }
 
-const char * meth_create_window_doc = R"(
-	create_window()
-)";
-
 PyMethodDef methods[] = {
-	{"create_window", (PyCFunction)meth_create_window, METH_VARARGS | METH_KEYWORDS, meth_create_window_doc},
+	{"create_window", (PyCFunction)meth_create_window, METH_VARARGS | METH_KEYWORDS, 0},
 	{0},
 };
 
