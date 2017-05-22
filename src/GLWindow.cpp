@@ -815,6 +815,16 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 			}
 			break;
 		}
+		case WM_SYSKEYDOWN:
+		case WM_SYSKEYUP: {
+			static bool sys_alt = false;
+			if (wParam == VK_MENU) {
+				sys_alt = (uMsg == WM_SYSKEYDOWN);
+			} else if (sys_alt && uMsg == WM_SYSKEYDOWN && wParam == VK_F4) {
+				DestroyWindow(hWnd);
+			}
+			return 0;
+		}
 	}
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
