@@ -42,6 +42,12 @@ struct Window {
 
 	int mouse_delta_x;
 	int mouse_delta_y;
+
+	bool disable_hotkeys;
+
+	int frames;
+	int seconds;
+	bool show_fps;
 };
 
 PyObject * module;
@@ -49,7 +55,6 @@ Window * window;
 
 bool created;
 bool destroyed;
-bool disable_hotkeys;
 
 PyObject * Window_tp_new(PyTypeObject * type, PyObject * args, PyObject * kwargs) {
 	Window * self = (Window *)type->tp_alloc(type, 0);
@@ -143,6 +148,22 @@ PyObject * Window_windowed(Window * self, PyObject * args) {
 PyObject * Window_update(Window * self) {
 	SwapBuffers(self->hdc);
 
+	long long now;
+	QueryPerformanceCounter((LARGE_INTEGER *)&now);
+	int seconds = (int)((now - self->timer_counter) / self->timer_frequency);
+
+	if (self->seconds < seconds) {
+		self->seconds = seconds;
+		if (self->show_fps) {
+			wchar_t title[256];
+			wsprintf(title, L"FPS: %d", self->frames);
+			SetWindowText(self->hwnd, title);
+			self->frames = 0;
+		}
+	}
+
+	self->frames += 1;
+
 	MSG msg;
 	while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE) > 0) {
 		if (msg.message == WM_QUIT) {
@@ -187,7 +208,7 @@ PyObject * Window_update(Window * self) {
 				self->mouse_delta_y = 0;
 			}
 
-			if (!disable_hotkeys && self->key_state[VK_CONTROL] != KEY_UP && self->key_state[VK_SHIFT] != KEY_UP) {
+			if (!self->disable_hotkeys && self->key_state[VK_CONTROL] != KEY_UP && self->key_state[VK_SHIFT] != KEY_UP) {
 				if (self->key_state['Q'] == KEY_PRESSED) {
 					DestroyWindow(self->hwnd);
 				}
@@ -250,6 +271,9 @@ PyObject * Window_update(Window * self) {
 					PyObject * args = PyTuple_Pack(2, width, height);
 					Py_XDECREF(Window_windowed(self, args));
 					Py_DECREF(args);
+				}
+				if (self->key_state['F'] == KEY_PRESSED) {
+					self->show_fps = !self->show_fps;
 				}
 			}
 		}
@@ -868,6 +892,11 @@ PyObject * meth_create_window(PyObject * self, PyObject * args, PyObject * kwarg
 
 	QueryPerformanceFrequency((LARGE_INTEGER *)&window->timer_frequency);
 	QueryPerformanceCounter((LARGE_INTEGER *)&window->timer_counter);
+
+	window->disable_hotkeys = false;
+
+	window->seconds = 0;
+	window->frames = 0;
 
 	created = true;
 
