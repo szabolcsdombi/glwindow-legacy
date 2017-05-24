@@ -2,8 +2,9 @@
 
 #define UNICODE
 #include <Windows.h>
+#include <GL/gl.h>
 
-extern "C" void WINAPI glViewport(int x, int y, int width, int height);
+// extern "C" void WINAPI glViewport(int x, int y, int width, int height);
 
 #include "ModernContext.hpp"
 
@@ -52,6 +53,10 @@ struct Window {
 
 PyObject * module;
 Window * window;
+
+bool barrier_1;
+bool barrier_2;
+bool barrier_3;
 
 bool created;
 bool destroyed;
@@ -741,6 +746,177 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 
+struct CreateWindowParameters {
+	PyObject * width;
+	PyObject * height;
+	int samples;
+	int fullscreen;
+	PyObject * title;
+};
+
+void window_thread(CreateWindowParameters * parameters) {
+	window->hinst = GetModuleHandle(0);
+
+	if (!window->hinst) {
+		PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
+		barrier_1 = true;
+		return;
+	}
+
+	WNDCLASSW wnd_class = {
+		CS_OWNDC | CS_VREDRAW | CS_HREDRAW,   // style
+		WindowProc,                           // lpfnWndProc
+		0,                                    // cbClsExtra
+		0,                                    // cbWndExtra
+		window->hinst,                        // hInstance
+		0,                                    // hIcon
+		(HCURSOR)LoadCursor(0, IDC_ARROW),    // hCursor
+		(HBRUSH)COLOR_WINDOW,                 // hbrBackground
+		0,                                    // lpszMenuName
+		L"GLWindow",                          // lpszClassName
+	};
+
+	if (!RegisterClass(&wnd_class)) {
+		PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
+		barrier_1 = true;
+		return;
+	}
+
+	int width_hint = GetSystemMetrics(SM_CXSCREEN);
+	int height_hint = GetSystemMetrics(SM_CYSCREEN);
+
+	if (Py_TYPE(parameters->width) == &PyLong_Type && Py_TYPE(parameters->height) == &PyLong_Type) {
+		width_hint = PyLong_AsLong(parameters->width);
+		height_hint = PyLong_AsLong(parameters->height);
+	}
+
+	window->hwnd = CreateWindowEx(
+		0,                           // exStyle
+		L"GLWindow",                 // lpClassName
+		0,                           // lpWindowName
+		0,                           // dwStyle
+		0,                           // x
+		0,                           // y
+		width_hint,                  // nWidth
+		height_hint,                 // nHeight
+		0,                           // hWndParent
+		0,                           // hMenu
+		window->hinst,               // hInstance
+		0                            // lpParam
+	);
+
+	if (!window->hwnd) {
+		PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
+		barrier_1 = true;
+		return;
+	}
+
+	window->hdc = GetDC(window->hwnd);
+
+	if (!window->hdc) {
+		PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
+		barrier_1 = true;
+		return;
+	}
+
+	window->hrc = CreateModernContext(window->hdc, parameters->samples);
+
+	if (!window->hrc) {
+		PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
+		// Py_DECREF(window);
+		// TerminateThread(thread, 0);
+		// return 0;
+		barrier_1 = true;
+		return;
+	}
+
+	if (!wglMakeCurrent(window->hdc, window->hrc)) {
+		PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
+		// Py_DECREF(window);
+		// TerminateThread(thread, 0);
+		// return 0;
+		barrier_1 = true;
+		return;
+	}
+
+	wglSwapInterval = (wglSwapIntervalProc)wglGetProcAddress("wglSwapIntervalEXT");
+
+	wglMakeCurrent(0, 0);
+
+	barrier_1 = true;
+
+	while (!barrier_2) {
+		Sleep(1);
+	}
+
+	for (int i = 0; i < 4; ++i) {
+		SwapBuffers(window->hdc);
+	}
+
+	if (parameters->fullscreen) {
+
+		Py_XDECREF(Window_fullscreen(window));
+
+	} else if (!parameters->fullscreen && parameters->width != Py_None && parameters->height != Py_None) {
+
+		Py_INCREF(parameters->width);
+		Py_INCREF(parameters->height);
+		PyObject * args = PyTuple_Pack(2, parameters->width, parameters->height);
+		Py_XDECREF(Window_windowed(window, args));
+		Py_DECREF(args);
+
+		if (PyErr_Occurred()) {
+			PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
+			barrier_3 = true;
+			return;
+		}
+
+	} else if (!parameters->fullscreen && parameters->width == Py_None && parameters->height == Py_None) {
+
+		PyObject * width = PyLong_FromLong(1280);
+		PyObject * height = PyLong_FromLong(720);
+		PyObject * args = PyTuple_Pack(2, width, height);
+		Py_XDECREF(Window_windowed(window, args));
+		Py_DECREF(args);
+
+	} else {
+
+		PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
+		barrier_3 = true;
+		return;
+
+	}
+
+	if (parameters->title != Py_None && Window_set_title(window, parameters->title, 0)) {
+		PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
+		barrier_3 = true;
+		return;
+	}
+
+	QueryPerformanceFrequency((LARGE_INTEGER *)&window->timer_frequency);
+	QueryPerformanceCounter((LARGE_INTEGER *)&window->timer_counter);
+
+	window->disable_hotkeys = false;
+
+	window->seconds = 0;
+	window->frames = 0;
+
+	barrier_3 = true;
+
+	while (true) {
+		MSG msg;
+		while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE) > 0) {
+			if (msg.message == WM_QUIT) {
+				destroyed = true;
+				return;
+			}
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+		Sleep(1);
+	}
+}
+
 PyObject * meth_create_window(PyObject * self, PyObject * args, PyObject * kwargs) {
 	PyObject * width;
 	PyObject * height;
@@ -772,133 +948,50 @@ PyObject * meth_create_window(PyObject * self, PyObject * args, PyObject * kwarg
 		return 0;
 	}
 
-	window = Window_New();
-	Py_INCREF(window);
-
-	window->hinst = GetModuleHandle(0);
-
-	if (!window->hinst) {
-		PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
-		return 0;
-	}
-
-	WNDCLASSW wnd_class = {
-		CS_OWNDC | CS_VREDRAW | CS_HREDRAW,   // style
-		WindowProc,                           // lpfnWndProc
-		0,                                    // cbClsExtra
-		0,                                    // cbWndExtra
-		window->hinst,                        // hInstance
-		0,                                    // hIcon
-		(HCURSOR)LoadCursor(0, IDC_ARROW),    // hCursor
-		(HBRUSH)COLOR_WINDOW,                 // hbrBackground
-		0,                                    // lpszMenuName
-		L"GLWindow",                          // lpszClassName
+	CreateWindowParameters parameters = {
+		width,
+		height,
+		samples,
+		fullscreen,
+		title,
 	};
 
-	if (!RegisterClass(&wnd_class)) {
-		PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
-		return 0;
-	}
+	window = Window_New();
 
-	int width_hint = GetSystemMetrics(SM_CXSCREEN);
-	int height_hint = GetSystemMetrics(SM_CYSCREEN);
+	HANDLE thread = CreateThread(0, 0, (LPTHREAD_START_ROUTINE)window_thread, &parameters, 0, 0);
 
-	if (Py_TYPE(width) == &PyLong_Type && Py_TYPE(height) == &PyLong_Type) {
-		width_hint = PyLong_AsLong(width);
-		height_hint = PyLong_AsLong(height);
-	}
-
-	window->hwnd = CreateWindowEx(
-		0,                           // exStyle
-		L"GLWindow",                 // lpClassName
-		0,                           // lpWindowName
-		0,                           // dwStyle
-		0,                           // x
-		0,                           // y
-		width_hint,                  // nWidth
-		height_hint,                 // nHeight
-		0,                           // hWndParent
-		0,                           // hMenu
-		window->hinst,               // hInstance
-		0                            // lpParam
-	);
-
-	if (!window->hwnd) {
-		PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
-		return 0;
-	}
-
-	window->hdc = GetDC(window->hwnd);
-
-	if (!window->hdc) {
-		PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
-		return 0;
-	}
-
-	window->hrc = CreateModernContext(window->hdc, samples);
-
-	if (!window->hrc) {
-		PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
-		return 0;
+	while (!barrier_1) {
+		Sleep(1);
 	}
 
 	if (!wglMakeCurrent(window->hdc, window->hrc)) {
 		PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
+		Py_DECREF(window);
+		TerminateThread(thread, 0);
 		return 0;
 	}
 
-	wglSwapInterval = (wglSwapIntervalProc)wglGetProcAddress("wglSwapIntervalEXT");
+	barrier_2 = true;
 
-	for (int i = 0; i < 4; ++i) {
-		SwapBuffers(window->hdc);
-	}
-
-	if (fullscreen) {
-
-		Py_XDECREF(Window_fullscreen(window));
-
-	} else if (!fullscreen && width != Py_None && height != Py_None) {
-
-		Py_INCREF(width);
-		Py_INCREF(height);
-		PyObject * args = PyTuple_Pack(2, width, height);
-		Py_XDECREF(Window_windowed(window, args));
-		Py_DECREF(args);
-
-		if (PyErr_Occurred()) {
-			PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
-			return 0;
-		}
-
-	} else if (!fullscreen && width == Py_None && height == Py_None) {
-
-		PyObject * width = PyLong_FromLong(1280);
-		PyObject * height = PyLong_FromLong(720);
-		PyObject * args = PyTuple_Pack(2, width, height);
-		Py_XDECREF(Window_windowed(window, args));
-		Py_DECREF(args);
-
-	} else {
-
-		PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
-		return 0;
-
-	}
-
-	if (title != Py_None && Window_set_title(window, title, 0)) {
-		PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
+	if (PyErr_Occurred()) {
+		Py_DECREF(window);
+		TerminateThread(thread, 0);
 		return 0;
 	}
 
-	QueryPerformanceFrequency((LARGE_INTEGER *)&window->timer_frequency);
-	QueryPerformanceCounter((LARGE_INTEGER *)&window->timer_counter);
+	while (!barrier_3) {
+		Sleep(1);
+	}
 
-	window->disable_hotkeys = false;
-
-	window->seconds = 0;
-	window->frames = 0;
+	if (PyErr_Occurred()) {
+		Py_DECREF(window);
+		TerminateThread(thread, 0);
+		return 0;
+	}
 
 	created = true;
+
+	Py_INCREF(window);
 
 	return (PyObject *)window;
 }
