@@ -13,7 +13,7 @@ def main():
         Sample program to test GLWindow.
     '''
 
-    wnd = GLWindow.create_window(480, 480, title='GLWindow sample.')
+    wnd = GLWindow.create_window(480, 480, title='GLWindow Sample')
     ctx = ModernGL.create_context()
 
     prog = ctx.program([
