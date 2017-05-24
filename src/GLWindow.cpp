@@ -91,7 +91,7 @@ PyObject * Window_fullscreen(Window * self) {
 	Py_RETURN_NONE;
 }
 
-PyObject * Window_windowed(Window * self, PyObject * args, PyObject * kwargs) {
+PyObject * Window_windowed(Window * self, PyObject * args) {
 	int width;
 	int height;
 
@@ -193,78 +193,62 @@ PyObject * Window_update(Window * self) {
 				}
 
 				if (self->key_state['1'] == KEY_PRESSED) {
-					Py_DECREF(Window_fullscreen(self));
+					Py_XDECREF(Window_fullscreen(self));
 				}
 				if (self->key_state['2'] == KEY_PRESSED) {
 					PyObject * width = PyLong_FromLong(1920);
 					PyObject * height = PyLong_FromLong(1080);
 					PyObject * args = PyTuple_Pack(2, width, height);
-					PyObject * kwargs = PyDict_New();
-					Py_DECREF(Window_windowed(self, args, kwargs));
-					Py_DECREF(kwargs);
+					Py_XDECREF(Window_windowed(self, args));
 					Py_DECREF(args);
 				}
 				if (self->key_state['3'] == KEY_PRESSED) {
 					PyObject * width = PyLong_FromLong(1600);
 					PyObject * height = PyLong_FromLong(900);
 					PyObject * args = PyTuple_Pack(2, width, height);
-					PyObject * kwargs = PyDict_New();
-					Py_DECREF(Window_windowed(self, args, kwargs));
-					Py_DECREF(kwargs);
+					Py_XDECREF(Window_windowed(self, args));
 					Py_DECREF(args);
 				}
 				if (self->key_state['4'] == KEY_PRESSED) {
 					PyObject * width = PyLong_FromLong(1366);
 					PyObject * height = PyLong_FromLong(768);
 					PyObject * args = PyTuple_Pack(2, width, height);
-					PyObject * kwargs = PyDict_New();
-					Py_DECREF(Window_windowed(self, args, kwargs));
-					Py_DECREF(kwargs);
+					Py_XDECREF(Window_windowed(self, args));
 					Py_DECREF(args);
 				}
 				if (self->key_state['5'] == KEY_PRESSED) {
 					PyObject * width = PyLong_FromLong(1280);
 					PyObject * height = PyLong_FromLong(720);
 					PyObject * args = PyTuple_Pack(2, width, height);
-					PyObject * kwargs = PyDict_New();
-					Py_DECREF(Window_windowed(self, args, kwargs));
-					Py_DECREF(kwargs);
+					Py_XDECREF(Window_windowed(self, args));
 					Py_DECREF(args);
 				}
 				if (self->key_state['6'] == KEY_PRESSED) {
 					PyObject * width = PyLong_FromLong(1024);
 					PyObject * height = PyLong_FromLong(768);
 					PyObject * args = PyTuple_Pack(2, width, height);
-					PyObject * kwargs = PyDict_New();
-					Py_DECREF(Window_windowed(self, args, kwargs));
-					Py_DECREF(kwargs);
+					Py_XDECREF(Window_windowed(self, args));
 					Py_DECREF(args);
 				}
 				if (self->key_state['7'] == KEY_PRESSED) {
 					PyObject * width = PyLong_FromLong(800);
 					PyObject * height = PyLong_FromLong(600);
 					PyObject * args = PyTuple_Pack(2, width, height);
-					PyObject * kwargs = PyDict_New();
-					Py_DECREF(Window_windowed(self, args, kwargs));
-					Py_DECREF(kwargs);
+					Py_XDECREF(Window_windowed(self, args));
 					Py_DECREF(args);
 				}
 				if (self->key_state['8'] == KEY_PRESSED) {
 					PyObject * width = PyLong_FromLong(600);
 					PyObject * height = PyLong_FromLong(400);
 					PyObject * args = PyTuple_Pack(2, width, height);
-					PyObject * kwargs = PyDict_New();
-					Py_DECREF(Window_windowed(self, args, kwargs));
-					Py_DECREF(kwargs);
+					Py_XDECREF(Window_windowed(self, args));
 					Py_DECREF(args);
 				}
 				if (self->key_state['9'] == KEY_PRESSED) {
 					PyObject * width = PyLong_FromLong(320);
 					PyObject * height = PyLong_FromLong(240);
 					PyObject * args = PyTuple_Pack(2, width, height);
-					PyObject * kwargs = PyDict_New();
-					Py_DECREF(Window_windowed(self, args, kwargs));
-					Py_DECREF(kwargs);
+					Py_XDECREF(Window_windowed(self, args));
 					Py_DECREF(args);
 				}
 			}
@@ -847,16 +831,14 @@ PyObject * meth_create_window(PyObject * self, PyObject * args, PyObject * kwarg
 
 	if (fullscreen) {
 
-		Py_DECREF(Window_fullscreen(window));
+		Py_XDECREF(Window_fullscreen(window));
 
 	} else if (!fullscreen && width != Py_None && height != Py_None) {
 
 		Py_INCREF(width);
 		Py_INCREF(height);
 		PyObject * args = PyTuple_Pack(2, width, height);
-		PyObject * kwargs = PyDict_New();
-		Py_DECREF(Window_windowed(window, args, kwargs));
-		Py_DECREF(kwargs);
+		Py_XDECREF(Window_windowed(window, args));
 		Py_DECREF(args);
 
 		if (PyErr_Occurred()) {
@@ -869,9 +851,7 @@ PyObject * meth_create_window(PyObject * self, PyObject * args, PyObject * kwarg
 		PyObject * width = PyLong_FromLong(1280);
 		PyObject * height = PyLong_FromLong(720);
 		PyObject * args = PyTuple_Pack(2, width, height);
-		PyObject * kwargs = PyDict_New();
-		Py_DECREF(Window_windowed(window, args, kwargs));
-		Py_DECREF(kwargs);
+		Py_XDECREF(Window_windowed(window, args));
 		Py_DECREF(args);
 
 	} else {
