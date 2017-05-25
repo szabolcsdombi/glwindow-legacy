@@ -8,9 +8,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Threaded window handling.
 - Getter for vsync attribute.
+- `get_window()` function.
 
 ### Removed
 - `swap_buffers()` method.
+
+### Fixed
+- Render hang when window was moving.
 
 ## [2.0.4] - 2017-05-22
 ### Added
