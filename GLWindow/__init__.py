@@ -1,5 +1,5 @@
 '''
-    GLWindow
+    OpenGL Window
 
     Examples:
 
@@ -17,19 +17,32 @@
 
 # pylint: disable=using-constant-test
 
+import os
 from typing import Tuple
 
 try:
-    from GLWindow import glwnd
+    import GLWindow.glwnd as glwnd
 
 except ImportError:
-    pass
+
+    if os.environ.get('READTHEDOCS') == 'True':
+        from GLWindow.mock import glwnd
+
+    else:
+        _IMPORT_ERROR = '\n'.join([
+            'No implementation found for GLWindow',
+            'Are you sure the source code is compiled properly?',
+            'Hint: python3 setup.py build_ext -b .',
+        ])
+
+        raise ImportError(_IMPORT_ERROR) from None
+
 
 from GLWindow import keys
 
 
 __all__ = [
-    'Window', 'create_window', 'keys',
+    'Window', 'create_window', 'get_window', 'keys',
 ]
 
 
@@ -221,29 +234,25 @@ class Window:
         return self.wnd.text_input
 
 
-if False:
-    def glwnd_create_window(*args) -> Window:
-        '''
-            glwnd_create_window
-        '''
-
-        return Window(*args)
-
-    glwnd.create_window = glwnd_create_window
-
-
-def create_window(width=None, height=None, samples=16, *,
-        fullscreen=False, title=None, threaded=True) -> Window:
+def create_window(width=None, height=None, samples=16, *, fullscreen=False, title=None, threaded=True) -> Window:
     '''
         create the main window
     '''
 
     if samples < 0 or (samples & (samples - 1)) != 0:
         raise Exception('Invalid number of samples: %d' % samples)
-    
+
     if (width is None) ^ (height is None):
         raise Exception('Error width = %r and height = %r' % (width, height))
 
     window = Window.__new__(Window)
     window.wnd = glwnd.create_window(width, height, samples, fullscreen, title, threaded)
     return window
+
+
+def get_window() -> Window:
+    '''
+        Returns the main window.
+    '''
+
+    return glwnd.get_window()
