@@ -7,6 +7,7 @@ Welcome to GLWindow's documentation!
 .. currentmodule:: GLWindow
 
 .. autofunction:: GLWindow.create_window(width=None, height=None, samples=16, fullscreen=False, title=None) -> Window
+.. autofunction:: GLWindow.get_window() -> Window
 
 .. autoclass:: Window
 	:members: mouse, mouse_delta, size, viewport, title, vsync, time, text_input
@@ -15,7 +16,6 @@ Welcome to GLWindow's documentation!
 	.. automethod:: windowed(width, height)
 	.. automethod:: update()
 	.. automethod:: make_current()
-	.. automethod:: swap_buffers()
 	.. automethod:: key_pressed(key)
 	.. automethod:: key_down(key)
 	.. automethod:: key_released(key)

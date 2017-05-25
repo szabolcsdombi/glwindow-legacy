@@ -72,13 +72,6 @@ class Window:
 
         self.wnd.make_current()
 
-    def swap_buffers(self) -> None:
-        '''
-            manually swap buffers
-        '''
-
-        self.wnd.swap_buffers()
-
     def key_pressed(self, key) -> bool:
         '''
             Is the key pressed?
@@ -239,7 +232,8 @@ if False:
     glwnd.create_window = glwnd_create_window
 
 
-def create_window(width=None, height=None, samples=16, *, fullscreen=False, title=None) -> Window:
+def create_window(width=None, height=None, samples=16, *,
+        fullscreen=False, title=None, threaded=True) -> Window:
     '''
         create the main window
     '''
@@ -251,5 +245,5 @@ def create_window(width=None, height=None, samples=16, *, fullscreen=False, titl
         raise Exception('Error width = %r and height = %r' % (width, height))
 
     window = Window.__new__(Window)
-    window.wnd = glwnd.create_window(width, height, samples, fullscreen, title)
+    window.wnd = glwnd.create_window(width, height, samples, fullscreen, title, threaded)
     return window

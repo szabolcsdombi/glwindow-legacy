@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Added
+- Threaded window handling.
+- Getter for vsync attribute.
+
+### Removed
+- `swap_buffers()` method.
 
 ## [2.0.4] - 2017-05-22
 ### Added

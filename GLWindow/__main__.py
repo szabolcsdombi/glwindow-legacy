@@ -14,6 +14,8 @@ def main():
     '''
 
     wnd = GLWindow.create_window(480, 480, title='GLWindow Sample')
+    wnd.vsync = False
+    
     ctx = ModernGL.create_context()
 
     prog = ctx.program([

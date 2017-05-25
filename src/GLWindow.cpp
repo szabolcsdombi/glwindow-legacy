@@ -9,7 +9,10 @@
 #include "ModernContext.hpp"
 
 typedef void (WINAPI * wglSwapIntervalProc)(int interval);
+typedef int (WINAPI * wglGetSwapIntervalProc)();
+
 wglSwapIntervalProc wglSwapInterval;
+wglGetSwapIntervalProc wglGetSwapInterval;
 
 enum KeyState {
 	KEY_UP,
@@ -21,44 +24,45 @@ enum KeyState {
 struct Window {
 	PyObject_HEAD
 
+	HANDLE mutex;
+	HANDLE thread;
 	HINSTANCE hinst;
 	HWND hwnd;
 	HDC hdc;
 	HGLRC hrc;
 
-	int adjusted_width;
-	int adjusted_height;
+	int width;
+	int height;
 
 	long long timer_counter;
+	long long timer_last_counter;
 	long long timer_frequency;
+	double elapsed;
 
+	bool show;
+	bool disable_hotkeys;
 	bool grab_mouse;
+	bool show_fps;
 
 	bool key_down[256];
 	KeyState key_state[256];
 
-	wchar_t text_input[256];
+	wchar_t text_input[2][256];
+	int text_input_prefix;
 	int text_input_size;
 	int text_cursor;
 
 	int mouse_delta_x;
 	int mouse_delta_y;
 
-	bool disable_hotkeys;
-
 	int frames;
 	int seconds;
-	bool show_fps;
 };
 
-PyObject * module;
 Window * window;
 
-bool barrier_1;
-bool barrier_2;
-bool barrier_3;
-
 bool created;
+bool barrier;
 bool destroyed;
 
 PyObject * Window_tp_new(PyTypeObject * type, PyObject * args, PyObject * kwargs) {
@@ -79,24 +83,32 @@ int Window_tp_init(Window * self, PyObject * args, PyObject * kwargs) {
 	return -1;
 }
 
-PyObject * Window_tp_str(Window * self) {
-	return PyUnicode_FromFormat("<glwnd.Window>");
-}
-
-PyObject * Window_fullscreen(Window * self) {
-	self->adjusted_width = GetSystemMetrics(SM_CXSCREEN);
-	self->adjusted_height = GetSystemMetrics(SM_CYSCREEN);
-
-	SetWindowLong(self->hwnd, GWL_EXSTYLE, 0);
-	SetWindowLong(self->hwnd, GWL_STYLE, WS_POPUP);
-	SetWindowPos(self->hwnd, HWND_TOP, 0, 0, self->adjusted_width, self->adjusted_height, 0);
+void Window_Show(Window * self) {
 	ShowWindow(self->hwnd, SW_SHOW);
-
 	SetForegroundWindow(self->hwnd);
 	SetActiveWindow(self->hwnd);
 	SetFocus(self->hwnd);
+	self->show = true;
+}
 
-	glViewport(0, 0, self->adjusted_width, self->adjusted_height);
+PyObject * Window_fullscreen(Window * self) {
+	int width = GetSystemMetrics(SM_CXSCREEN);
+	int height = GetSystemMetrics(SM_CYSCREEN);
+
+	WaitForSingleObject(window->mutex, INFINITE);
+	self->width = width;
+	self->height = height;
+	ReleaseMutex(window->mutex);
+
+	SetWindowLong(self->hwnd, GWL_EXSTYLE, 0);
+	SetWindowLong(self->hwnd, GWL_STYLE, WS_POPUP);
+	SetWindowPos(self->hwnd, HWND_TOP, 0, 0, width, height, 0);
+
+	if (self->show) {
+		Window_Show(self);
+	}
+
+	glViewport(0, 0, width, height);
 
 	Py_RETURN_NONE;
 }
@@ -126,11 +138,16 @@ PyObject * Window_windowed(Window * self, PyObject * args) {
 
 	AdjustWindowRect(&rect, style, 0);
 
-	self->adjusted_width = rect.right - rect.left;
-	self->adjusted_height = rect.bottom - rect.top;
+	int adjusted_width = rect.right - rect.left;
+	int adjusted_height = rect.bottom - rect.top;
 
-	int x = (sw - self->adjusted_width) / 2;
-	int y = (sh - self->adjusted_height) / 2;
+	WaitForSingleObject(window->mutex, INFINITE);
+	self->width = adjusted_width;
+	self->height = adjusted_height;
+	ReleaseMutex(window->mutex);
+
+	int x = (sw - width) / 2;
+	int y = (sh - height) / 2;
 
 	if (y < 0) {
 		y = 0;
@@ -138,12 +155,11 @@ PyObject * Window_windowed(Window * self, PyObject * args) {
 
 	SetWindowLong(self->hwnd, GWL_EXSTYLE, WS_EX_DLGMODALFRAME);
 	SetWindowLong(self->hwnd, GWL_STYLE, style);
-	SetWindowPos(self->hwnd, HWND_TOP, x, y, self->adjusted_width, self->adjusted_height, 0);
-	ShowWindow(self->hwnd, SW_SHOW);
+	SetWindowPos(self->hwnd, HWND_TOP, x, y, adjusted_width, adjusted_height, 0);
 
-	SetForegroundWindow(self->hwnd);
-	SetActiveWindow(self->hwnd);
-	SetFocus(self->hwnd);
+	if (self->show) {
+		Window_Show(self);
+	}
 
 	glViewport(0, 0, width, height);
 
@@ -153,29 +169,49 @@ PyObject * Window_windowed(Window * self, PyObject * args) {
 PyObject * Window_update(Window * self) {
 	SwapBuffers(self->hdc);
 
+	if (!self->show) {
+		Window_Show(self);
+	}
+
 	long long now;
 	QueryPerformanceCounter((LARGE_INTEGER *)&now);
-	int seconds = (int)((now - self->timer_counter) / self->timer_frequency);
+	double frame_time = (double)(now - self->timer_last_counter) / self->timer_frequency;
+	int frame_time_ms = (int)(frame_time * 1000.0);
+
+	if (frame_time_ms < 5) {
+		Sleep(5 - frame_time_ms);
+		QueryPerformanceCounter((LARGE_INTEGER *)&now);
+	}
+
+	self->timer_last_counter = now;
+	self->elapsed = (double)(now - self->timer_counter) / self->timer_frequency;
+
+	int seconds = (int)self->elapsed;
 
 	if (self->seconds < seconds) {
 		self->seconds = seconds;
+
 		if (self->show_fps) {
 			wchar_t title[256];
 			wsprintf(title, L"FPS: %d", self->frames);
 			SetWindowText(self->hwnd, title);
-			self->frames = 0;
 		}
+
+		self->frames = 0;
 	}
 
 	self->frames += 1;
 
-	MSG msg;
-	while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE) > 0) {
-		if (msg.message == WM_QUIT) {
-			destroyed = true;
+	if (!self->thread) {
+		MSG msg;
+		while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE) > 0) {
+			if (msg.message == WM_QUIT) {
+				destroyed = true;
+				break;
+			}
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
 		}
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
 	}
 
 	if (!destroyed) {
@@ -193,11 +229,13 @@ PyObject * Window_update(Window * self) {
 			}
 		}
 
-		self->text_input[self->text_cursor] = 0;
+		WaitForSingleObject(window->mutex, INFINITE);
 		self->text_input_size = self->text_cursor;
+		self->text_input_prefix = (self->text_input_prefix + 1) % 2;
 		self->text_cursor = 0;
+		ReleaseMutex(window->mutex);
 
-		if (self->hwnd == GetForegroundWindow() && self->hwnd == GetActiveWindow()) {
+		if (self->hwnd == GetForegroundWindow()) {
 			if (self->grab_mouse) {
 				RECT rect;
 				GetWindowRect(self->hwnd, &rect);
@@ -294,11 +332,6 @@ PyObject * Window_update(Window * self) {
 PyObject * Window_make_current(Window * self) {
 	PyErr_Format(PyExc_NotImplementedError, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
 	return 0;
-}
-
-PyObject * Window_swap_buffers(Window * self) {
-	SwapBuffers(self->hdc);
-	Py_RETURN_NONE;
 }
 
 PyObject * Window_grab_mouse(Window * self, PyObject * args, PyObject * kwargs) {
@@ -522,7 +555,6 @@ PyMethodDef Window_tp_methods[] = {
 	{"windowed", (PyCFunction)Window_windowed, METH_VARARGS, 0},
 	{"update", (PyCFunction)Window_update, METH_NOARGS, 0},
 	{"make_current", (PyCFunction)Window_make_current, METH_NOARGS, 0},
-	{"swap_buffers", (PyCFunction)Window_swap_buffers, METH_NOARGS, 0},
 	{"key_pressed", (PyCFunction)Window_key_pressed, METH_VARARGS, 0},
 	{"key_down", (PyCFunction)Window_key_down, METH_VARARGS, 0},
 	{"key_released", (PyCFunction)Window_key_released, METH_VARARGS, 0},
@@ -582,8 +614,10 @@ int Window_set_title(Window * self, PyObject * value, void * closure) {
 }
 
 PyObject * Window_get_vsync(Window * self, void * closure) {
-	PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
-	return 0;
+	if (wglGetSwapInterval) {
+		return PyBool_FromLong(wglGetSwapInterval());
+	}
+	Py_RETURN_FALSE;
 }
 
 int Window_set_vsync(Window * self, PyObject * value, void * closure) {
@@ -604,14 +638,15 @@ int Window_set_vsync(Window * self, PyObject * value, void * closure) {
 }
 
 PyObject * Window_get_time(Window * self, void * closure) {
-	long long now;
-	QueryPerformanceCounter((LARGE_INTEGER *)&now);
-	double elapsed = (double)(now - self->timer_counter) / self->timer_frequency;
-	return PyFloat_FromDouble(elapsed);
+	return PyFloat_FromDouble(self->elapsed);
 }
 
 PyObject * Window_get_text_input(Window * self, void * closure) {
-	return PyUnicode_FromUnicode(self->text_input, self->text_input_size);
+	WaitForSingleObject(window->mutex, INFINITE);
+	wchar_t * text = self->text_input[(self->text_input_prefix + 1) % 2];
+	ReleaseMutex(window->mutex);
+
+	return PyUnicode_FromUnicode(text, self->text_input_size);
 }
 
 PyGetSetDef Window_tp_getseters[] = {
@@ -636,13 +671,13 @@ PyTypeObject Window_Type = {
 	0,                                                      // tp_getattr
 	0,                                                      // tp_setattr
 	0,                                                      // tp_reserved
-	(reprfunc)Window_tp_str,                                // tp_repr
+	0,                                                      // tp_repr
 	0,                                                      // tp_as_number
 	0,                                                      // tp_as_sequence
 	0,                                                      // tp_as_mapping
 	0,                                                      // tp_hash
 	0,                                                      // tp_call
-	(reprfunc)Window_tp_str,                                // tp_str
+	0,                                                      // tp_str
 	0,                                                      // tp_getattro
 	0,                                                      // tp_setattro
 	0,                                                      // tp_as_buffer
@@ -679,7 +714,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
 	switch (uMsg) {
 		case WM_CLOSE: {
-			DestroyWindow(hWnd);
+			DestroyWindow(window->hwnd);
 			return 0;
 		}
 		case WM_DESTROY: {
@@ -719,17 +754,21 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 			break;
 		}
 		case WM_CHAR: {
+			WaitForSingleObject(window->mutex, INFINITE);
 			if (window->text_cursor < 256 - 1) {
-				window->text_input[window->text_cursor++] = wParam & 0xFFFF;
+				window->text_input[window->text_input_prefix][window->text_cursor++] = wParam & 0xFFFF;
 			}
+			ReleaseMutex(window->mutex);
 			break;
 		}
 		case WM_GETMINMAXINFO: {
+			WaitForSingleObject(window->mutex, INFINITE);
 			MINMAXINFO * info = (MINMAXINFO *)lParam;
-			info->ptMinTrackSize.x = window->adjusted_width;
-			info->ptMinTrackSize.y = window->adjusted_height;
-			info->ptMaxTrackSize.x = window->adjusted_width;
-			info->ptMaxTrackSize.y = window->adjusted_height;
+			info->ptMinTrackSize.x = window->width;
+			info->ptMinTrackSize.y = window->height;
+			info->ptMaxTrackSize.x = window->width;
+			info->ptMaxTrackSize.y = window->height;
+			ReleaseMutex(window->mutex);
 			return 0;
 		}
 		case WM_SYSKEYDOWN:
@@ -738,7 +777,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 			if (wParam == VK_MENU) {
 				sys_alt = (uMsg == WM_SYSKEYDOWN);
 			} else if (sys_alt && uMsg == WM_SYSKEYDOWN && wParam == VK_F4) {
-				DestroyWindow(hWnd);
+				DestroyWindow(window->hwnd);
 			}
 			return 0;
 		}
@@ -754,40 +793,33 @@ struct CreateWindowParameters {
 	PyObject * title;
 };
 
-void window_thread(CreateWindowParameters * parameters) {
+void Window_Create(CreateWindowParameters * parameters) {
+
 	window->hinst = GetModuleHandle(0);
 
 	if (!window->hinst) {
 		PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
-		barrier_1 = true;
+		barrier = true;
 		return;
 	}
 
 	WNDCLASSW wnd_class = {
-		CS_OWNDC | CS_VREDRAW | CS_HREDRAW,   // style
+		CS_OWNDC,                             // style
 		WindowProc,                           // lpfnWndProc
 		0,                                    // cbClsExtra
 		0,                                    // cbWndExtra
 		window->hinst,                        // hInstance
 		0,                                    // hIcon
 		(HCURSOR)LoadCursor(0, IDC_ARROW),    // hCursor
-		(HBRUSH)COLOR_WINDOW,                 // hbrBackground
+		0,                                    // hbrBackground
 		0,                                    // lpszMenuName
 		L"GLWindow",                          // lpszClassName
 	};
 
 	if (!RegisterClass(&wnd_class)) {
 		PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
-		barrier_1 = true;
+		barrier = true;
 		return;
-	}
-
-	int width_hint = GetSystemMetrics(SM_CXSCREEN);
-	int height_hint = GetSystemMetrics(SM_CYSCREEN);
-
-	if (Py_TYPE(parameters->width) == &PyLong_Type && Py_TYPE(parameters->height) == &PyLong_Type) {
-		width_hint = PyLong_AsLong(parameters->width);
-		height_hint = PyLong_AsLong(parameters->height);
 	}
 
 	window->hwnd = CreateWindowEx(
@@ -797,8 +829,8 @@ void window_thread(CreateWindowParameters * parameters) {
 		0,                           // dwStyle
 		0,                           // x
 		0,                           // y
-		width_hint,                  // nWidth
-		height_hint,                 // nHeight
+		0,                           // nWidth
+		0,                           // nHeight
 		0,                           // hWndParent
 		0,                           // hMenu
 		window->hinst,               // hInstance
@@ -807,7 +839,7 @@ void window_thread(CreateWindowParameters * parameters) {
 
 	if (!window->hwnd) {
 		PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
-		barrier_1 = true;
+		barrier = true;
 		return;
 	}
 
@@ -815,7 +847,7 @@ void window_thread(CreateWindowParameters * parameters) {
 
 	if (!window->hdc) {
 		PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
-		barrier_1 = true;
+		barrier = true;
 		return;
 	}
 
@@ -823,34 +855,8 @@ void window_thread(CreateWindowParameters * parameters) {
 
 	if (!window->hrc) {
 		PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
-		// Py_DECREF(window);
-		// TerminateThread(thread, 0);
-		// return 0;
-		barrier_1 = true;
+		barrier = true;
 		return;
-	}
-
-	if (!wglMakeCurrent(window->hdc, window->hrc)) {
-		PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
-		// Py_DECREF(window);
-		// TerminateThread(thread, 0);
-		// return 0;
-		barrier_1 = true;
-		return;
-	}
-
-	wglSwapInterval = (wglSwapIntervalProc)wglGetProcAddress("wglSwapIntervalEXT");
-
-	wglMakeCurrent(0, 0);
-
-	barrier_1 = true;
-
-	while (!barrier_2) {
-		Sleep(1);
-	}
-
-	for (int i = 0; i < 4; ++i) {
-		SwapBuffers(window->hdc);
 	}
 
 	if (parameters->fullscreen) {
@@ -867,7 +873,7 @@ void window_thread(CreateWindowParameters * parameters) {
 
 		if (PyErr_Occurred()) {
 			PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
-			barrier_3 = true;
+			barrier = true;
 			return;
 		}
 
@@ -882,56 +888,50 @@ void window_thread(CreateWindowParameters * parameters) {
 	} else {
 
 		PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
-		barrier_3 = true;
+		barrier = true;
 		return;
 
 	}
 
 	if (parameters->title != Py_None && Window_set_title(window, parameters->title, 0)) {
 		PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
-		barrier_3 = true;
+		barrier = true;
 		return;
 	}
 
-	QueryPerformanceFrequency((LARGE_INTEGER *)&window->timer_frequency);
-	QueryPerformanceCounter((LARGE_INTEGER *)&window->timer_counter);
-
-	window->disable_hotkeys = false;
-
-	window->seconds = 0;
-	window->frames = 0;
-
-	barrier_3 = true;
-
-	while (true) {
-		MSG msg;
-		while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE) > 0) {
-			if (msg.message == WM_QUIT) {
-				destroyed = true;
-				return;
-			}
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-		Sleep(1);
-	}
+	barrier = true;
 }
 
-PyObject * meth_create_window(PyObject * self, PyObject * args, PyObject * kwargs) {
+void Window_CreateThreaded(CreateWindowParameters * parameters) {
+
+	Window_Create(parameters);
+
+	MSG msg;
+	while (GetMessage(&msg, 0, 0, 0)) {
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+
+	destroyed = true;
+}
+
+Window * meth_create_window(PyObject * self, PyObject * args) {
 	PyObject * width;
 	PyObject * height;
 	int samples;
 	int fullscreen;
 	PyObject * title;
+	int threaded;
 
 	int args_ok = PyArg_ParseTuple(
 		args,
-		"OOIpO",
+		"OOIpOp",
 		&width,
 		&height,
 		&samples,
 		&fullscreen,
-		&title
+		&title,
+		&threaded
 	);
 
 	if (!args_ok) {
@@ -957,47 +957,109 @@ PyObject * meth_create_window(PyObject * self, PyObject * args, PyObject * kwarg
 	};
 
 	window = Window_New();
+	Py_INCREF(window);
 
-	HANDLE thread = CreateThread(0, 0, (LPTHREAD_START_ROUTINE)window_thread, &parameters, 0, 0);
+	window->mutex = CreateMutex(0, false, 0);
+	window->thread = 0;
+	window->hinst = 0;
+	window->hwnd = 0;
+	window->hdc = 0;
+	window->hrc = 0;
 
-	while (!barrier_1) {
-		Sleep(1);
+	window->width = 0;
+	window->height = 0;
+
+	window->timer_counter = 0;
+	window->timer_last_counter = 0;
+	window->timer_frequency = 0;
+	window->elapsed = 0.0;
+
+	window->show = false;
+	window->disable_hotkeys = false;
+	window->grab_mouse = false;
+	window->show_fps = false;
+
+	for (int i = 0; i < 256; ++i) {
+		window->key_down[i] = false;
+	}
+
+	for (int i = 0; i < 256; ++i) {
+		window->key_state[256] = KEY_UP;
+	}
+
+	for (int i = 0; i < 256; ++i) {
+		window->text_input[0][256] = 0;
+		window->text_input[1][256] = 0;
+	}
+
+	window->text_input_size = 0;
+	window->text_cursor = 0;
+
+	window->mouse_delta_x = 0;
+	window->mouse_delta_y = 0;
+
+	window->frames = 0;
+	window->seconds = 0;
+
+	if (threaded) {
+		window->thread = CreateThread(0, 0, (LPTHREAD_START_ROUTINE)Window_CreateThreaded, &parameters, 0, 0);
+
+		while (!barrier) {
+			Sleep(1);
+		}
+	} else {
+		window->thread = 0;
+		Window_Create(&parameters);
+	}
+
+	if (PyErr_Occurred()) {
+		Py_DECREF(window);
+		if (window->thread) {
+			TerminateThread(window->thread, 0);
+		}
+		return 0;
 	}
 
 	if (!wglMakeCurrent(window->hdc, window->hrc)) {
 		PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
 		Py_DECREF(window);
-		TerminateThread(thread, 0);
+		if (window->thread) {
+			TerminateThread(window->thread, 0);
+		}
 		return 0;
 	}
 
-	barrier_2 = true;
+	wglSwapInterval = (wglSwapIntervalProc)wglGetProcAddress("wglSwapIntervalEXT");
 
-	if (PyErr_Occurred()) {
-		Py_DECREF(window);
-		TerminateThread(thread, 0);
-		return 0;
+	if (wglSwapInterval) {
+		wglSwapInterval(1);
 	}
 
-	while (!barrier_3) {
-		Sleep(1);
+	for (int i = 0; i < 4; ++i) {
+		SwapBuffers(window->hdc);
 	}
 
-	if (PyErr_Occurred()) {
-		Py_DECREF(window);
-		TerminateThread(thread, 0);
-		return 0;
-	}
+	QueryPerformanceFrequency((LARGE_INTEGER *)&window->timer_frequency);
+	QueryPerformanceCounter((LARGE_INTEGER *)&window->timer_counter);
+	window->timer_last_counter = window->timer_counter;
 
 	created = true;
 
-	Py_INCREF(window);
+	return window;
+}
 
-	return (PyObject *)window;
+PyObject * meth_get_window(PyObject * self, PyObject * args) {
+	if (window) {
+		Py_INCREF(window);
+		return (PyObject *)window;
+	} else {
+		Py_RETURN_NONE;
+	}
 }
 
 PyMethodDef methods[] = {
 	{"create_window", (PyCFunction)meth_create_window, METH_VARARGS, 0},
+	{"get_window", (PyCFunction)meth_get_window, METH_NOARGS, 0},
 	{0},
 };
 
@@ -1029,14 +1091,14 @@ PyObject * InitializeGLWindow(PyObject * module) {
 }
 
 extern "C" PyObject * PyInit_glwnd() {
-	module = PyModule_Create(&moduledef);
+	PyObject * module = PyModule_Create(&moduledef);
 	return InitializeGLWindow(module);
 }
 
 #else
 
 extern "C" PyObject * initglwnd() {
-	module = Py_InitModule("glwnd", methods);
+	PyObject * module = Py_InitModule("glwnd", methods);
 	return InitializeGLWindow(module);
 }
 
