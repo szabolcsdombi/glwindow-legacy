@@ -26,7 +26,7 @@ try:
 except ImportError:
 
     if os.environ.get('READTHEDOCS') == 'True':
-        from GLWindow.mock import glwnd
+        from .mock import glwnd
 
     else:
         _IMPORT_ERROR = '\n'.join([
@@ -38,7 +38,7 @@ except ImportError:
         raise ImportError(_IMPORT_ERROR) from None
 
 
-from GLWindow import keys
+from . import keys
 
 
 __all__ = [
