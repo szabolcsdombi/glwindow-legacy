@@ -1,12 +1,12 @@
-Welcome to GLWindow's documentation!
-====================================
+GLWindow
+========
 
 
 .. automodule:: GLWindow
 
 .. currentmodule:: GLWindow
 
-.. autofunction:: GLWindow.create_window(width=None, height=None, samples=16, fullscreen=False, title=None) -> Window
+.. autofunction:: GLWindow.create_window(width=None, height=None, samples=16, fullscreen=False, title=None, threaded=True) -> Window
 .. autofunction:: GLWindow.get_window() -> Window
 
 .. autoclass:: Window
@@ -27,12 +27,3 @@ Welcome to GLWindow's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

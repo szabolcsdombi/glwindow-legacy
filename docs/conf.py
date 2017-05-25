@@ -24,7 +24,7 @@ release = '2.1.0'
 
 language = None
 
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = []
 
 pygments_style = 'sphinx'
 
@@ -32,7 +32,7 @@ todo_include_todos = False
 
 html_theme = "sphinx_rtd_theme"
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
-html_static_path = []
+html_static_path = ['static']
 
 htmlhelp_basename = 'GLWindowdoc'
 
@@ -47,12 +47,12 @@ man_pages = [
 ]
 
 texinfo_documents = [
-    (master_doc, 'GLWindow', 'GLWindow Documentation', author, 'GLWindow', 'OpenGL Window', 'Miscellaneous'),
+    (master_doc, 'GLWindow', 'GLWindow Documentation', author, 'GLWindow', 'One line description of project.', 'Miscellaneous'),
 ]
 
 
 def setup(app):
-    app.add_stylesheet('static/css/custom.css')
+    app.add_stylesheet('css/custom.css')
 
 
 autodoc_member_order = 'bysource'
