@@ -61,7 +61,7 @@ void InitModernContext() {
 	if (initialized) {
 		return;
 	}
-	
+
 	initialized = true;
 
 	HMODULE hinst = GetModuleHandle(0);
@@ -199,7 +199,7 @@ HGLRC CreateModernContext(HDC hdc, int samples) {
 			if (!samples) {
 				break;
 			}
-			
+
 			samples /= 2;
 		}
 

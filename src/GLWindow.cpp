@@ -2,11 +2,10 @@
 
 #define UNICODE
 #include <Windows.h>
-#include <GL/gl.h>
-
-// extern "C" void WINAPI glViewport(int x, int y, int width, int height);
 
 #include "ModernContext.hpp"
+
+extern "C" void WINAPI glViewport(int x, int y, int width, int height);
 
 typedef void (WINAPI * wglSwapIntervalProc)(int interval);
 typedef int (WINAPI * wglGetSwapIntervalProc)();
