@@ -21,7 +21,7 @@ import os
 from typing import Tuple
 
 try:
-    import GLWindow.glwnd as glwnd
+    from . import glwnd
 
 except ImportError:
 
