@@ -355,9 +355,8 @@ PyObject * Window_grab_mouse(Window * self, PyObject * args, PyObject * kwargs) 
 		int cy = (rect.top + rect.bottom) / 2;
 		SetCursorPos(cx, cy);
 
-		ShowCursor(!grab_bool);
-
 		self->grab_mouse = grab_bool;
+		SendMessage(self->hwnd, WM_USER, 0, 0);
 	}
 
 	Py_RETURN_NONE;
@@ -778,6 +777,10 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 			} else if (sys_alt && uMsg == WM_SYSKEYDOWN && wParam == VK_F4) {
 				DestroyWindow(window->hwnd);
 			}
+			return 0;
+		}
+		case WM_USER: {
+			ShowCursor(!window->grab_mouse);
 			return 0;
 		}
 	}
