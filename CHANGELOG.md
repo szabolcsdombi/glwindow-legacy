@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [2.1.1] - 2017-06-06
 ### Fixed
 - Cursor visibility.
 
@@ -34,7 +36,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [1.0.0] - 2016-08-29
 
-[Unreleased]: https://github.com/cprogrammer1994/GLWindow/compare/2.1.0...master
+[Unreleased]: https://github.com/cprogrammer1994/GLWindow/compare/2.1.1...master
+[2.1.1]: https://github.com/cprogrammer1994/GLWindow/compare/2.1.0...2.1.1
 [2.1.0]: https://github.com/cprogrammer1994/GLWindow/compare/2.0.4...2.1.0
 [2.0.4]: https://github.com/cprogrammer1994/GLWindow/compare/2.0.3...2.0.4
 [2.0.3]: https://github.com/cprogrammer1994/GLWindow/tree/2.0.3
