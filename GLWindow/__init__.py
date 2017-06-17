@@ -44,6 +44,8 @@ __all__ = [
     'Window', 'create_window', 'get_window', 'keys',
 ]
 
+__version__ = '0.2.1'
+
 
 class Window:
     '''
