@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [2.1.2] - 2017-06-17
 ### Added
 - `clear()` function.
 - `ratio` attribute.
@@ -43,7 +45,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [1.0.0] - 2016-08-29
 
-[Unreleased]: https://github.com/cprogrammer1994/GLWindow/compare/2.1.1...master
+[Unreleased]: https://github.com/cprogrammer1994/GLWindow/compare/2.1.2...master
+[2.1.2]: https://github.com/cprogrammer1994/GLWindow/compare/2.1.1...2.1.2
 [2.1.1]: https://github.com/cprogrammer1994/GLWindow/compare/2.1.0...2.1.1
 [2.1.0]: https://github.com/cprogrammer1994/GLWindow/compare/2.0.4...2.1.0
 [2.0.4]: https://github.com/cprogrammer1994/GLWindow/compare/2.0.3...2.0.4
