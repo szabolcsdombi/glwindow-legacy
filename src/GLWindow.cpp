@@ -5,7 +5,12 @@
 
 #include "ModernContext.hpp"
 
+#define GL_COLOR_BUFFER_BIT 0x00004000
+#define GL_DEPTH_BUFFER_BIT 0x00000100
+
 extern "C" void WINAPI glViewport(int x, int y, int width, int height);
+extern "C" void WINAPI glClearColor(float r, float g, float b, float a);
+extern "C" void WINAPI glClear(unsigned mask);
 
 typedef void (WINAPI * wglSwapIntervalProc)(int interval);
 typedef int (WINAPI * wglGetSwapIntervalProc)();
@@ -88,6 +93,31 @@ void Window_Show(Window * self) {
 	SetActiveWindow(self->hwnd);
 	SetFocus(self->hwnd);
 	self->show = true;
+}
+
+PyObject * Window_clear(Window * self, PyObject * args) {
+	float red;
+	float green;
+	float blue;
+	float alpha;
+
+	int args_ok = PyArg_ParseTuple(
+		args,
+		"ffff",
+		&red,
+		&green,
+		&blue,
+		&alpha
+	);
+
+	if (!args_ok) {
+		return 0;
+	}
+
+	glClearColor(red, green, blue, alpha);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	Py_RETURN_NONE;
 }
 
 PyObject * Window_fullscreen(Window * self) {
@@ -549,6 +579,7 @@ PyObject * Window_set_small_icon(Window * self, PyObject * args, PyObject * kwar
 }
 
 PyMethodDef Window_tp_methods[] = {
+	{"clear", (PyCFunction)Window_clear, METH_VARARGS, 0},
 	{"fullscreen", (PyCFunction)Window_fullscreen, METH_NOARGS, 0},
 	{"windowed", (PyCFunction)Window_windowed, METH_VARARGS, 0},
 	{"update", (PyCFunction)Window_update, METH_NOARGS, 0},

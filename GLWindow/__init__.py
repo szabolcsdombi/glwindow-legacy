@@ -54,6 +54,13 @@ class Window:
         self.wnd = None
         raise Exception('Call create_window()')
 
+    def clear(self, red=0.0, green=0.0, blue=0.0, alpha=0.0) -> None:
+        '''
+            set the window to clear mode
+        '''
+
+        self.wnd.clear(red, green, blue, alpha)
+
     def fullscreen(self) -> None:
         '''
             set the window to fullscreen mode
