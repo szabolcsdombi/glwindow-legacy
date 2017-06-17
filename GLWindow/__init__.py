@@ -18,7 +18,7 @@
 # pylint: disable=using-constant-test
 
 import os
-from typing import Tuple
+from typing import Tuple, List
 
 try:
     from . import glwnd
@@ -36,7 +36,6 @@ except ImportError:
         ])
 
         raise ImportError(_IMPORT_ERROR) from None
-
 
 from . import keys
 
@@ -84,6 +83,13 @@ class Window:
         '''
 
         self.wnd.make_current()
+
+    def keys(self, key) -> List[str]:
+        '''
+            keys down
+        '''
+
+        return [keys.KEY_NAME.get(i, '%02X' % i) for i in range(256) if self.key_down(i)]
 
     def key_pressed(self, key) -> bool:
         '''
