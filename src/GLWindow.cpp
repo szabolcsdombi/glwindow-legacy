@@ -790,6 +790,14 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 			ReleaseMutex(window->mutex);
 			break;
 		}
+		case WM_ACTIVATE: {
+			if (wParam == WA_INACTIVE) {
+				for (int i = 0; i < 256; ++i) {
+					window->key_down[i] = false;
+				}
+			}
+			break;
+		}
 		case WM_GETMINMAXINFO: {
 			WaitForSingleObject(window->mutex, INFINITE);
 			MINMAXINFO * info = (MINMAXINFO *)lParam;
