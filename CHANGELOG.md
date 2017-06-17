@@ -5,7 +5,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Added
 - `clear()` function.
+- `keys` attribute.
+
+### Fixed
+- key states are unchanged when the window lost focus.
 
 ## [2.1.1] - 2017-06-06
 ### Fixed
