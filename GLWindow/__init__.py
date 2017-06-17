@@ -201,6 +201,14 @@ class Window:
         return self.wnd.size
 
     @property
+    def ratio(self) -> float:
+        '''
+            float: the ratio of the window
+        '''
+
+        return self.wnd.size[0] / self.wnd.size[1]
+
+    @property
     def viewport(self) -> Tuple[int, int, int, int]:
         '''
             tuple: viewport of the window
