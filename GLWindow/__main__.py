@@ -3,6 +3,7 @@
 '''
 
 import struct
+import sys
 
 import GLWindow
 import ModernGL
@@ -12,6 +13,10 @@ def main():
     '''
         Sample program to test GLWindow.
     '''
+
+    print('GLWindow:', GLWindow.__version__)
+    print('Python:', sys.version)
+    print('Platform:', sys.platform)
 
     wnd = GLWindow.create_window(480, 480, title='GLWindow Sample')
     wnd.vsync = False
@@ -56,10 +61,11 @@ def main():
     vao = ctx.simple_vertex_array(prog, vbo, ['vert', 'vert_color'])
 
     while wnd.update():
+        wnd.clear(0.95, 0.95, 0.95)
+
         width, height = wnd.size
         scale.value = (height / width * 0.75, 0.75)
         ctx.viewport = wnd.viewport
-        ctx.clear(240, 240, 240)
         ctx.enable(ModernGL.BLEND)
         rotation.value = wnd.time
         vao.render(instances=10)
