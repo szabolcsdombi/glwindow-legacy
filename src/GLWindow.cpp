@@ -363,7 +363,7 @@ PyObject * Window_make_current(Window * self) {
 	return 0;
 }
 
-PyObject * Window_grab_mouse(Window * self, PyObject * args, PyObject * kwargs) {
+PyObject * Window_grab_mouse(Window * self, PyObject * args) {
 	int grab;
 
 	int args_ok = PyArg_ParseTuple(
@@ -392,7 +392,7 @@ PyObject * Window_grab_mouse(Window * self, PyObject * args, PyObject * kwargs) 
 	Py_RETURN_NONE;
 }
 
-PyObject * Window_key_pressed(Window * self, PyObject * args, PyObject * kwargs) {
+PyObject * Window_key_pressed(Window * self, PyObject * args) {
 	PyObject * key;
 
 	int args_ok = PyArg_ParseTuple(
@@ -425,7 +425,7 @@ PyObject * Window_key_pressed(Window * self, PyObject * args, PyObject * kwargs)
 	return PyBool_FromLong(self->key_state[keycode] == KEY_PRESSED);
 }
 
-PyObject * Window_key_down(Window * self, PyObject * args, PyObject * kwargs) {
+PyObject * Window_key_down(Window * self, PyObject * args) {
 	PyObject * key;
 
 	int args_ok = PyArg_ParseTuple(
@@ -458,7 +458,7 @@ PyObject * Window_key_down(Window * self, PyObject * args, PyObject * kwargs) {
 	return PyBool_FromLong(self->key_state[keycode] != KEY_UP);
 }
 
-PyObject * Window_key_released(Window * self, PyObject * args, PyObject * kwargs) {
+PyObject * Window_key_released(Window * self, PyObject * args) {
 	PyObject * key;
 
 	int args_ok = PyArg_ParseTuple(
@@ -491,7 +491,7 @@ PyObject * Window_key_released(Window * self, PyObject * args, PyObject * kwargs
 	return PyBool_FromLong(self->key_state[keycode] == KEY_RELEASED);
 }
 
-PyObject * Window_key_up(Window * self, PyObject * args, PyObject * kwargs) {
+PyObject * Window_key_up(Window * self, PyObject * args) {
 	PyObject * key;
 
 	int args_ok = PyArg_ParseTuple(
@@ -524,7 +524,7 @@ PyObject * Window_key_up(Window * self, PyObject * args, PyObject * kwargs) {
 	return PyBool_FromLong(self->key_state[keycode] == KEY_UP);
 }
 
-PyObject * Window_set_icon(Window * self, PyObject * args, PyObject * kwargs) {
+PyObject * Window_set_icon(Window * self, PyObject * args) {
 	PyObject * filename;
 
 	int args_ok = PyArg_ParseTuple(
@@ -551,7 +551,7 @@ PyObject * Window_set_icon(Window * self, PyObject * args, PyObject * kwargs) {
 	Py_RETURN_NONE;
 }
 
-PyObject * Window_set_small_icon(Window * self, PyObject * args, PyObject * kwargs) {
+PyObject * Window_set_small_icon(Window * self, PyObject * args) {
 	PyObject * filename;
 
 	int args_ok = PyArg_ParseTuple(
@@ -611,12 +611,16 @@ PyObject * Window_get_mouse_delta(Window * self, void * closure) {
 	return PyTuple_Pack(2, x, y);
 }
 
-PyObject * Window_get_size(Window * self, void * closure) {
+PyObject * Window_get_width(Window * self, void * closure) {
 	RECT rect;
 	GetClientRect(self->hwnd, &rect);
-	PyObject * width = PyLong_FromLong(rect.right - rect.left);
-	PyObject * height = PyLong_FromLong(rect.bottom - rect.top);
-	return PyTuple_Pack(2, width, height);
+	return PyLong_FromLong(rect.right - rect.left);
+}
+
+PyObject * Window_get_height(Window * self, void * closure) {
+	RECT rect;
+	GetClientRect(self->hwnd, &rect);
+	return PyLong_FromLong(rect.bottom - rect.top);
 }
 
 PyObject * Window_get_viewport(Window * self, void * closure) {
@@ -666,6 +670,23 @@ int Window_set_vsync(Window * self, PyObject * value, void * closure) {
 	return 0;
 }
 
+PyObject * Window_get_debug_hotkeys(Window * self, void * closure) {
+	return PyBool_FromLong(!self->disable_hotkeys);
+}
+
+int Window_set_debug_hotkeys(Window * self, PyObject * value, void * closure) {
+	if (value == Py_True) {
+		self->disable_hotkeys = false;
+	} else if (value == Py_False) {
+		self->disable_hotkeys = true;
+	} else {
+		PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
+		return -1;
+	}
+
+	return 0;
+}
+
 PyObject * Window_get_time(Window * self, void * closure) {
 	return PyFloat_FromDouble(self->elapsed);
 }
@@ -681,12 +702,14 @@ PyObject * Window_get_text_input(Window * self, void * closure) {
 PyGetSetDef Window_tp_getseters[] = {
 	{(char *)"mouse", (getter)Window_get_mouse, 0, 0, 0},
 	{(char *)"mouse_delta", (getter)Window_get_mouse_delta, 0, 0, 0},
-	{(char *)"size", (getter)Window_get_size, 0, 0, 0},
+	{(char *)"width", (getter)Window_get_width, 0, 0, 0},
+	{(char *)"height", (getter)Window_get_height, 0, 0, 0},
 	{(char *)"viewport", (getter)Window_get_viewport, 0, 0, 0},
 	{(char *)"title", 0, (setter)Window_set_title, 0, 0},
 	{(char *)"vsync", (getter)Window_get_vsync, (setter)Window_set_vsync, 0, 0},
 	{(char *)"time", (getter)Window_get_time, 0, 0, 0},
 	{(char *)"text_input", (getter)Window_get_text_input, 0, 0, 0},
+	{(char *)"debug_hotkeys", (getter)Window_get_debug_hotkeys, (setter)Window_set_debug_hotkeys, 0, 0},
 	{0},
 };
 

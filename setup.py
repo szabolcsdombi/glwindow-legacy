@@ -3,7 +3,7 @@ from setuptools import setup, Extension
 long_description = '''
 `GLWindow on github <https://github.com/cprogrammer1994/GLWindow>`_
 
-`Documentation <http://glwindow.readthedocs.io/en/latest/>`_
+`Documentation <http://glwindow.readthedocs.io/>`_
 '''
 
 GLWindow = Extension(
@@ -17,7 +17,7 @@ GLWindow = Extension(
 
 setup(
 	name = 'GLWindow',
-	version = '2.1.2',
+	version = '2.1.3',
 	description = 'GLWindow',
 	long_description = long_description.strip(),
 	url = 'https://github.com/cprogrammer1994/GLWindow',

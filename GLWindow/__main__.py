@@ -18,7 +18,7 @@ def main():
     print('Python:', sys.version)
     print('Platform:', sys.platform)
 
-    wnd = GLWindow.create_window(480, 480, title='GLWindow Sample')
+    wnd = GLWindow.create_window((480, 480), title='GLWindow Sample')
     wnd.vsync = False
 
     ctx = ModernGL.create_context()

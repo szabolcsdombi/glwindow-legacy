@@ -58,44 +58,46 @@ class Window:
 
     def clear(self, red=0.0, green=0.0, blue=0.0, alpha=0.0) -> None:
         '''
-            set the window to clear mode
+            Clear the window.
         '''
 
         self.wnd.clear(red, green, blue, alpha)
 
     def fullscreen(self) -> None:
         '''
-            set the window to fullscreen mode
+            Set the window to fullscreen mode.
         '''
 
         self.wnd.fullscreen()
 
-    def windowed(self, width, height) -> None:
+    def windowed(self, size) -> None:
         '''
-            set the window to windowed mode
+            Set the window to windowed mode.
         '''
+
+        width, height = size
 
         self.wnd.windowed(width, height)
 
     def update(self) -> None:
         '''
-            process window events
-            swap buffers
-            update key states
+            Process window events.
+            Swap buffers.
+            Update key states.
         '''
 
         return self.wnd.update()
 
     def make_current(self) -> None:
         '''
-            activate the opengl context associated with the window
+            Activate the opengl context associated with the window.
         '''
 
         self.wnd.make_current()
 
     def keys(self, key) -> List[str]:
         '''
-            keys down
+            list: The keys down.
         '''
 
         return [keys.KEY_NAME.get(i, '%02X' % i) for i in range(256) if self.key_down(i)]
@@ -154,24 +156,24 @@ class Window:
 
     def set_icon(self, filename):
         '''
-            set the window icon
-            to set the small icon use :py:meth:`~Window.set_small_icon` instead
+            Set the window icon.
+            To set the small icon use :py:meth:`~Window.set_small_icon` instead.
         '''
 
         self.wnd.set_icon(filename)
 
     def set_small_icon(self, filename):
         '''
-            set the small window icon
-            to set the large icon use :py:meth:`~Window.set_icon` instead
+            Set the small window icon.
+            To set the large icon use :py:meth:`~Window.set_icon` instead.
         '''
 
         self.wnd.set_small_icon(filename)
 
     def grab_mouse(self, grab):
         '''
-            lock the mouse to the center of the window
-            use the :py:attr:`mouse` or :py:attr:`mouse_delta` to get the mouse position
+            Lock the mouse to the center of the window.
+            Use the :py:attr:`mouse` or :py:attr:`mouse_delta` to get the mouse position.
         '''
 
         self.wnd.grab_mouse(grab)
@@ -187,31 +189,47 @@ class Window:
     @property
     def mouse_delta(self) -> Tuple[int, int]:
         '''
-            tuple: The mouse_delta of the window
+            tuple: The mouse delta of the window.
         '''
 
         return self.wnd.mouse_delta
 
     @property
-    def size(self) -> Tuple[int, int]:
+    def width(self) -> int:
         '''
-            tuple: size of the window
+            int: The width of the window.
         '''
 
-        return self.wnd.size
+        return self.wnd.width
+
+    @property
+    def height(self) -> int:
+        '''
+            int: The height of the window.
+        '''
+
+        return self.wnd.height
+
+    @property
+    def size(self) -> Tuple[int, int]:
+        '''
+            tuple: The size of the window.
+        '''
+
+        return (self.width, self.height)
 
     @property
     def ratio(self) -> float:
         '''
-            float: the ratio of the window
+            float: The ratio of the window.
         '''
 
-        return self.wnd.size[0] / self.wnd.size[1]
+        return self.width / self.height
 
     @property
     def viewport(self) -> Tuple[int, int, int, int]:
         '''
-            tuple: viewport of the window
+            tuple: The viewport of the window.
         '''
 
         return self.wnd.viewport
@@ -219,10 +237,10 @@ class Window:
     @property
     def title(self) -> str:
         '''
-            str: title of the window
+            str: The title of the window.
         '''
 
-        raise NotImplementedError()
+        raise NotImplementedError('only setter')
 
     @title.setter
     def title(self, value):
@@ -231,7 +249,7 @@ class Window:
     @property
     def vsync(self) -> bool:
         '''
-            bool: vsync
+            bool: The vsync flag.
         '''
 
         return self.wnd.vsync
@@ -243,7 +261,7 @@ class Window:
     @property
     def time(self) -> float:
         '''
-            float: time
+            float: The elapsed time.
         '''
 
         return self.wnd.time
@@ -251,22 +269,45 @@ class Window:
     @property
     def text_input(self) -> str:
         '''
-            str: text_input
+            str: The text input.
         '''
 
         return self.wnd.text_input
 
+    @property
+    def debug_hotkeys(self) -> bool:
+        '''
+            bool: Debug hotkeys enable flag.
+        '''
 
-def create_window(width=None, height=None, samples=16, *, fullscreen=False, title=None, threaded=True) -> Window:
+        return self.wnd.debug_hotkeys
+
+    @debug_hotkeys.setter
+    def debug_hotkeys(self, value):
+        self.wnd.debug_hotkeys = value
+
+
+def create_window(size=None, samples=16, *, fullscreen=False, title=None, threaded=True) -> Window:
     '''
-        create the main window
+        Create the main window.
+
+        Args:
+            size (tuple): The width and height of the window.
+            samples (int): The number of samples.
+
+        Keyword Args:
+            fullscreen (bool): Fullscreen?
+            title (bool): The title of the window.
+            threaded (bool): Threaded?
+
+        Returns:
+            Window: The main window.
     '''
+
+    width, height = size
 
     if samples < 0 or (samples & (samples - 1)) != 0:
         raise Exception('Invalid number of samples: %d' % samples)
-
-    if (width is None) ^ (height is None):
-        raise Exception('Error width = %r and height = %r' % (width, height))
 
     window = Window.__new__(Window)
     window.wnd = glwnd.create_window(width, height, samples, fullscreen, title, threaded)
@@ -275,7 +316,10 @@ def create_window(width=None, height=None, samples=16, *, fullscreen=False, titl
 
 def get_window() -> Window:
     '''
-        Returns the main window.
+        The main window.
+
+        Returns:
+            Window: The main window.
     '''
 
     return glwnd.get_window()
