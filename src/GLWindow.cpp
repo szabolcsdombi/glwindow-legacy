@@ -207,10 +207,10 @@ PyObject * Window_update(Window * self) {
 	double frame_time = (double)(now - self->timer_last_counter) / self->timer_frequency;
 	int frame_time_ms = (int)(frame_time * 1000.0);
 
-	if (frame_time_ms < 5) {
-		Sleep(5 - frame_time_ms);
-		QueryPerformanceCounter((LARGE_INTEGER *)&now);
-	}
+	// if (frame_time_ms < 4) {
+	// 	Sleep(4 - frame_time_ms);
+	// 	QueryPerformanceCounter((LARGE_INTEGER *)&now);
+	// }
 
 	self->timer_last_counter = now;
 	self->elapsed = (double)(now - self->timer_counter) / self->timer_frequency;
