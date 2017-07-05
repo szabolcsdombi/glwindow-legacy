@@ -17,7 +17,7 @@ GLWindow = Extension(
 
 setup(
 	name = 'GLWindow',
-	version = '2.1.3',
+	version = '2.2.0',
 	description = 'GLWindow',
 	long_description = long_description.strip(),
 	url = 'https://github.com/cprogrammer1994/GLWindow',
