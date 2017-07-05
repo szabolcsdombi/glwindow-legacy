@@ -6,14 +6,14 @@ GLWindow
 
 .. currentmodule:: GLWindow
 
-.. autofunction:: GLWindow.create_window(width=None, height=None, samples=16, fullscreen=False, title=None, threaded=True) -> Window
+.. autofunction:: GLWindow.create_window(size=None, samples=16, fullscreen=False, title=None, threaded=True) -> Window
 .. autofunction:: GLWindow.get_window() -> Window
 
 .. autoclass:: Window
 	:members: mouse, mouse_delta, width, height, size, viewport, ratio, title, vsync, time, text_input, debug_hotkeys
 
 	.. automethod:: fullscreen()
-	.. automethod:: windowed(width, height)
+	.. automethod:: windowed(size)
 	.. automethod:: update()
 	.. automethod:: make_current()
 	.. automethod:: key_pressed(key)
