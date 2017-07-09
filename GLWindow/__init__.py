@@ -304,7 +304,11 @@ def create_window(size=None, samples=16, *, fullscreen=False, title=None, thread
             Window: The main window.
     '''
 
-    width, height = size
+    if size is None:
+        width, height = 1280, 720
+
+    else:
+        width, height = size
 
     if samples < 0 or (samples & (samples - 1)) != 0:
         raise Exception('Invalid number of samples: %d' % samples)
