@@ -10,12 +10,12 @@ class Implementation:
         Implementation
     '''
 
-    def create_window(*args) -> 'Window':
+    def create_window(self, *args) -> 'Window':
         '''
             create_window
         '''
 
-    def get_window() -> 'Window':
+    def get_window(self) -> 'Window':
         '''
             get_window
         '''
