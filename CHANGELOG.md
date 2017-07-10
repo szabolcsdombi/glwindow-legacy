@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-## [2.2.2] - 2017-07-10
+## [2.3.0] - 2017-07-10
 
 ### Fixed
 
