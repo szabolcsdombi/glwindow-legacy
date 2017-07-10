@@ -90,8 +90,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [1.0.0] - 2016-08-29
 
-[Unreleased]: https://github.com/cprogrammer1994/GLWindow/compare/2.2.2...master
-[2.2.2]: https://github.com/cprogrammer1994/GLWindow/compare/2.2.1...2.2.2
+[Unreleased]: https://github.com/cprogrammer1994/GLWindow/compare/2.3.0...master
+[2.3.0]: https://github.com/cprogrammer1994/GLWindow/compare/2.2.1...2.3.0
 [2.2.1]: https://github.com/cprogrammer1994/GLWindow/compare/2.2.0...2.2.1
 [2.2.0]: https://github.com/cprogrammer1994/GLWindow/compare/2.1.2...2.2.0
 [2.1.2]: https://github.com/cprogrammer1994/GLWindow/compare/2.1.1...2.1.2
