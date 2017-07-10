@@ -41,6 +41,7 @@ struct Window {
 	long long timer_counter;
 	long long timer_last_counter;
 	long long timer_frequency;
+	double frame_time;
 	double elapsed;
 
 	bool show;
@@ -204,8 +205,8 @@ PyObject * Window_update(Window * self) {
 
 	long long now;
 	QueryPerformanceCounter((LARGE_INTEGER *)&now);
-	double frame_time = (double)(now - self->timer_last_counter) / self->timer_frequency;
-	int frame_time_ms = (int)(frame_time * 1000.0);
+	self->frame_time = (double)(now - self->timer_last_counter) / self->timer_frequency;
+	int frame_time_ms = (int)(self->frame_time * 1000.0);
 
 	// if (frame_time_ms < 4) {
 	// 	Sleep(4 - frame_time_ms);
@@ -691,6 +692,10 @@ PyObject * Window_get_time(Window * self, void * closure) {
 	return PyFloat_FromDouble(self->elapsed);
 }
 
+PyObject * Window_get_time_delta(Window * self, void * closure) {
+	return PyFloat_FromDouble(self->frame_time);
+}
+
 PyObject * Window_get_text_input(Window * self, void * closure) {
 	WaitForSingleObject(window->mutex, INFINITE);
 	wchar_t * text = self->text_input[(self->text_input_prefix + 1) % 2];
@@ -708,6 +713,7 @@ PyGetSetDef Window_tp_getseters[] = {
 	{(char *)"title", 0, (setter)Window_set_title, 0, 0},
 	{(char *)"vsync", (getter)Window_get_vsync, (setter)Window_set_vsync, 0, 0},
 	{(char *)"time", (getter)Window_get_time, 0, 0, 0},
+	{(char *)"time_delta", (getter)Window_get_time_delta, 0, 0, 0},
 	{(char *)"text_input", (getter)Window_get_text_input, 0, 0, 0},
 	{(char *)"debug_hotkeys", (getter)Window_get_debug_hotkeys, (setter)Window_set_debug_hotkeys, 0, 0},
 	{0},

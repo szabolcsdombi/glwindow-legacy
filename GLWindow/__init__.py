@@ -52,6 +52,8 @@ class Window:
         Window
     '''
 
+    __slots__ = ['wnd']
+
     def __init__(self):
         self.wnd = None
         raise Exception('Call create_window()')
@@ -265,6 +267,14 @@ class Window:
         '''
 
         return self.wnd.time
+
+    @property
+    def time_delta(self) -> float:
+        '''
+            float: The elapsed frame time.
+        '''
+
+        return self.wnd.time_delta
 
     @property
     def text_input(self) -> str:
