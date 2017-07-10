@@ -15,8 +15,6 @@
                 # Render Scene
 '''
 
-# pylint: disable=using-constant-test
-
 import os
 from typing import Tuple, List
 
@@ -96,13 +94,6 @@ class Window:
         '''
 
         self.wnd.make_current()
-
-    def keys(self, key) -> List[str]:
-        '''
-            list: The keys down.
-        '''
-
-        return [keys.KEY_NAME.get(i, '%02X' % i) for i in range(256) if self.key_down(i)]
 
     def key_pressed(self, key) -> bool:
         '''
@@ -295,6 +286,14 @@ class Window:
     @debug_hotkeys.setter
     def debug_hotkeys(self, value):
         self.wnd.debug_hotkeys = value
+
+    @property
+    def keys(self) -> List[str]:
+        '''
+            list: The keys down.
+        '''
+
+        return [keys.KEY_NAME.get(i, '%02X' % i) for i in range(256) if self.key_down(i)]
 
 
 def create_window(size=None, samples=16, *, fullscreen=False, title=None, threaded=True) -> Window:

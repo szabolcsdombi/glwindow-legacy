@@ -10,7 +10,7 @@ GLWindow
 .. autofunction:: GLWindow.get_window() -> Window
 
 .. autoclass:: Window
-	:members: mouse, mouse_delta, width, height, size, viewport, ratio, title, vsync, time, time_delta, text_input, debug_hotkeys
+	:members: mouse, mouse_delta, width, height, size, viewport, ratio, title, vsync, time, time_delta, text_input, debug_hotkeys, keys
 
 	.. automethod:: fullscreen()
 	.. automethod:: windowed(size)

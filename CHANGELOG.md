@@ -9,9 +9,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [2.2.2] - 2017-07-10
 
+### Fixed
+
+- duplicate keys in dictionary.
+
 ### Added
 
+- `title` getter.
 - `time_delta` attribute.
+
+### Changed
+
+- `keys` method to `keys` property.
 
 ## [2.2.1] - 2017-07-09
 
