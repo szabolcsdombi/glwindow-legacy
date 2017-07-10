@@ -634,6 +634,15 @@ PyObject * Window_get_viewport(Window * self, void * closure) {
 	return PyTuple_Pack(4, x, y, width, height);
 }
 
+PyObject * Window_get_title(Window * self, void * closure) {
+	int length = GetWindowTextLength(self->hwnd);
+	wchar_t * title = new wchar_t[length + 1];
+	GetWindowTextW(self->hwnd, title, length + 1);
+	PyObject * result = PyUnicode_FromUnicode(title, length);
+	delete[] title;
+	return result;
+}
+
 int Window_set_title(Window * self, PyObject * value, void * closure) {
 	if (Py_TYPE(value) != &PyUnicode_Type) {
 		PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
@@ -710,7 +719,7 @@ PyGetSetDef Window_tp_getseters[] = {
 	{(char *)"width", (getter)Window_get_width, 0, 0, 0},
 	{(char *)"height", (getter)Window_get_height, 0, 0, 0},
 	{(char *)"viewport", (getter)Window_get_viewport, 0, 0, 0},
-	{(char *)"title", 0, (setter)Window_set_title, 0, 0},
+	{(char *)"title", (getter)Window_get_title, (setter)Window_set_title, 0, 0},
 	{(char *)"vsync", (getter)Window_get_vsync, (setter)Window_set_vsync, 0, 0},
 	{(char *)"time", (getter)Window_get_time, 0, 0, 0},
 	{(char *)"time_delta", (getter)Window_get_time_delta, 0, 0, 0},

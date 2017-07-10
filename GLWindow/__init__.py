@@ -242,7 +242,7 @@ class Window:
             str: The title of the window.
         '''
 
-        raise NotImplementedError('only setter')
+        return self.wnd.title
 
     @title.setter
     def title(self, value):
