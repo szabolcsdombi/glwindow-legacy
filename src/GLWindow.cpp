@@ -642,15 +642,6 @@ PyObject * Window_get_mouse(Window * self, void * closure) {
 	}
 }
 
-PyObject * Window_get_mouse_delta(Window * self, void * closure) {
-	PyObject * x = PyLong_FromLong(self->mouse_delta_x);
-	PyObject * y = PyLong_FromLong(self->mouse_delta_y);
-	PyObject * result = PyTuple_New(2);
-	PyTuple_SET_ITEM(result, 0, x);
-	PyTuple_SET_ITEM(result, 1, y);
-	return result;
-}
-
 PyObject * Window_get_width(Window * self, void * closure) {
 	RECT rect;
 	GetClientRect(self->hwnd, &rect);
@@ -759,7 +750,6 @@ PyObject * Window_get_text_input(Window * self, void * closure) {
 
 PyGetSetDef Window_tp_getseters[] = {
 	{(char *)"mouse", (getter)Window_get_mouse, 0, 0, 0},
-	{(char *)"mouse_delta", (getter)Window_get_mouse_delta, 0, 0, 0},
 	{(char *)"width", (getter)Window_get_width, 0, 0, 0},
 	{(char *)"height", (getter)Window_get_height, 0, 0, 0},
 	{(char *)"viewport", (getter)Window_get_viewport, 0, 0, 0},

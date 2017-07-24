@@ -166,7 +166,7 @@ class Window:
     def grab_mouse(self, grab):
         '''
             Lock the mouse to the center of the window.
-            Use the :py:attr:`mouse` or :py:attr:`mouse_delta` to get the mouse position.
+            Use the :py:attr:`mouse` to get the mouse position.
         '''
 
         self.wnd.grab_mouse(grab)
@@ -182,10 +182,12 @@ class Window:
     @property
     def mouse_delta(self) -> Tuple[int, int]:
         '''
-            tuple: The mouse delta of the window.
+            DEPRECATED!
+
+            Use the :py:attr:`mouse` to get the mouse position.
         '''
 
-        return self.wnd.mouse_delta
+        return self.wnd.mouse
 
     @property
     def width(self) -> int:
