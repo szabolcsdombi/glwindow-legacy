@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- division by zero when height is zero.
 - memory leaks.
 
 ## [2.3.0] - 2017-07-10
