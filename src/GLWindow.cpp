@@ -294,6 +294,8 @@ PyObject * Window_update(Window * self) {
 					PyObject * height = PyLong_FromLong(1080);
 					PyObject * args = PyTuple_Pack(2, width, height);
 					Py_XDECREF(Window_windowed(self, args));
+					Py_DECREF(width);
+					Py_DECREF(height);
 					Py_DECREF(args);
 				}
 				if (self->key_state['3'] == KEY_PRESSED) {
@@ -301,6 +303,8 @@ PyObject * Window_update(Window * self) {
 					PyObject * height = PyLong_FromLong(900);
 					PyObject * args = PyTuple_Pack(2, width, height);
 					Py_XDECREF(Window_windowed(self, args));
+					Py_DECREF(width);
+					Py_DECREF(height);
 					Py_DECREF(args);
 				}
 				if (self->key_state['4'] == KEY_PRESSED) {
@@ -308,6 +312,8 @@ PyObject * Window_update(Window * self) {
 					PyObject * height = PyLong_FromLong(768);
 					PyObject * args = PyTuple_Pack(2, width, height);
 					Py_XDECREF(Window_windowed(self, args));
+					Py_DECREF(width);
+					Py_DECREF(height);
 					Py_DECREF(args);
 				}
 				if (self->key_state['5'] == KEY_PRESSED) {
@@ -315,6 +321,8 @@ PyObject * Window_update(Window * self) {
 					PyObject * height = PyLong_FromLong(720);
 					PyObject * args = PyTuple_Pack(2, width, height);
 					Py_XDECREF(Window_windowed(self, args));
+					Py_DECREF(width);
+					Py_DECREF(height);
 					Py_DECREF(args);
 				}
 				if (self->key_state['6'] == KEY_PRESSED) {
@@ -322,6 +330,8 @@ PyObject * Window_update(Window * self) {
 					PyObject * height = PyLong_FromLong(768);
 					PyObject * args = PyTuple_Pack(2, width, height);
 					Py_XDECREF(Window_windowed(self, args));
+					Py_DECREF(width);
+					Py_DECREF(height);
 					Py_DECREF(args);
 				}
 				if (self->key_state['7'] == KEY_PRESSED) {
@@ -329,6 +339,8 @@ PyObject * Window_update(Window * self) {
 					PyObject * height = PyLong_FromLong(600);
 					PyObject * args = PyTuple_Pack(2, width, height);
 					Py_XDECREF(Window_windowed(self, args));
+					Py_DECREF(width);
+					Py_DECREF(height);
 					Py_DECREF(args);
 				}
 				if (self->key_state['8'] == KEY_PRESSED) {
@@ -336,6 +348,8 @@ PyObject * Window_update(Window * self) {
 					PyObject * height = PyLong_FromLong(400);
 					PyObject * args = PyTuple_Pack(2, width, height);
 					Py_XDECREF(Window_windowed(self, args));
+					Py_DECREF(width);
+					Py_DECREF(height);
 					Py_DECREF(args);
 				}
 				if (self->key_state['9'] == KEY_PRESSED) {
@@ -343,6 +357,8 @@ PyObject * Window_update(Window * self) {
 					PyObject * height = PyLong_FromLong(240);
 					PyObject * args = PyTuple_Pack(2, width, height);
 					Py_XDECREF(Window_windowed(self, args));
+					Py_DECREF(width);
+					Py_DECREF(height);
 					Py_DECREF(args);
 				}
 				if (self->key_state['F'] == KEY_PRESSED) {
@@ -603,13 +619,19 @@ PyObject * Window_get_mouse(Window * self, void * closure) {
 	GetClientRect(self->hwnd, &rect);
 	PyObject * x = PyLong_FromLong(mouse.x);
 	PyObject * y = PyLong_FromLong(rect.bottom - rect.top - mouse.y - 1);
-	return PyTuple_Pack(2, x, y);
+	PyObject * result = PyTuple_New(2);
+	PyTuple_SET_ITEM(result, 0, x);
+	PyTuple_SET_ITEM(result, 1, y);
+	return result;
 }
 
 PyObject * Window_get_mouse_delta(Window * self, void * closure) {
 	PyObject * x = PyLong_FromLong(self->mouse_delta_x);
 	PyObject * y = PyLong_FromLong(self->mouse_delta_y);
-	return PyTuple_Pack(2, x, y);
+	PyObject * result = PyTuple_New(2);
+	PyTuple_SET_ITEM(result, 0, x);
+	PyTuple_SET_ITEM(result, 1, y);
+	return result;
 }
 
 PyObject * Window_get_width(Window * self, void * closure) {
@@ -631,7 +653,12 @@ PyObject * Window_get_viewport(Window * self, void * closure) {
 	PyObject * y = PyLong_FromLong(rect.top);
 	PyObject * width = PyLong_FromLong(rect.right - rect.left);
 	PyObject * height = PyLong_FromLong(rect.bottom - rect.top);
-	return PyTuple_Pack(4, x, y, width, height);
+	PyObject * result = PyTuple_New(4);
+	PyTuple_SET_ITEM(result, 0, x);
+	PyTuple_SET_ITEM(result, 1, y);
+	PyTuple_SET_ITEM(result, 2, width);
+	PyTuple_SET_ITEM(result, 3, height);
+	return result;
 }
 
 PyObject * Window_get_title(Window * self, void * closure) {
@@ -944,8 +971,6 @@ void Window_Create(CreateWindowParameters * parameters) {
 
 	} else if (!parameters->fullscreen && parameters->width != Py_None && parameters->height != Py_None) {
 
-		Py_INCREF(parameters->width);
-		Py_INCREF(parameters->height);
 		PyObject * args = PyTuple_Pack(2, parameters->width, parameters->height);
 		Py_XDECREF(Window_windowed(window, args));
 		Py_DECREF(args);
@@ -962,6 +987,8 @@ void Window_Create(CreateWindowParameters * parameters) {
 		PyObject * height = PyLong_FromLong(720);
 		PyObject * args = PyTuple_Pack(2, width, height);
 		Py_XDECREF(Window_windowed(window, args));
+		Py_DECREF(width);
+		Py_DECREF(height);
 		Py_DECREF(args);
 
 	} else {
