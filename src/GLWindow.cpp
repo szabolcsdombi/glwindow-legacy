@@ -8,6 +8,7 @@
 #define GL_COLOR_BUFFER_BIT 0x00004000
 #define GL_DEPTH_BUFFER_BIT 0x00000100
 
+
 extern "C" void WINAPI glViewport(int x, int y, int width, int height);
 extern "C" void WINAPI glClearColor(float r, float g, float b, float a);
 extern "C" void WINAPI glClear(unsigned mask);
@@ -17,6 +18,13 @@ typedef int (WINAPI * wglGetSwapIntervalProc)();
 
 wglSwapIntervalProc wglSwapInterval;
 wglGetSwapIntervalProc wglGetSwapInterval;
+
+int positive(int x) {
+	if (x < 1) {
+		return 1;
+	}
+	return x;
+}
 
 enum KeyState {
 	KEY_UP,
@@ -176,8 +184,8 @@ PyObject * Window_windowed(Window * self, PyObject * args) {
 	self->height = adjusted_height;
 	ReleaseMutex(window->mutex);
 
-	int x = (sw - width) / 2;
-	int y = (sh - height) / 2;
+	int x = (sw - adjusted_width) / 2;
+	int y = (sh - adjusted_height) / 2;
 
 	if (y < 0) {
 		y = 0;
@@ -637,13 +645,13 @@ PyObject * Window_get_mouse_delta(Window * self, void * closure) {
 PyObject * Window_get_width(Window * self, void * closure) {
 	RECT rect;
 	GetClientRect(self->hwnd, &rect);
-	return PyLong_FromLong(rect.right - rect.left);
+	return PyLong_FromLong(positive(rect.right - rect.left));
 }
 
 PyObject * Window_get_height(Window * self, void * closure) {
 	RECT rect;
 	GetClientRect(self->hwnd, &rect);
-	return PyLong_FromLong(rect.bottom - rect.top);
+	return PyLong_FromLong(positive(rect.bottom - rect.top));
 }
 
 PyObject * Window_get_viewport(Window * self, void * closure) {
@@ -651,8 +659,8 @@ PyObject * Window_get_viewport(Window * self, void * closure) {
 	GetClientRect(self->hwnd, &rect);
 	PyObject * x = PyLong_FromLong(rect.left);
 	PyObject * y = PyLong_FromLong(rect.top);
-	PyObject * width = PyLong_FromLong(rect.right - rect.left);
-	PyObject * height = PyLong_FromLong(rect.bottom - rect.top);
+	PyObject * width = PyLong_FromLong(positive(rect.right - rect.left));
+	PyObject * height = PyLong_FromLong(positive(rect.bottom - rect.top));
 	PyObject * result = PyTuple_New(4);
 	PyTuple_SET_ITEM(result, 0, x);
 	PyTuple_SET_ITEM(result, 1, y);
