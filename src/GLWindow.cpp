@@ -620,17 +620,26 @@ PyMethodDef Window_tp_methods[] = {
 };
 
 PyObject * Window_get_mouse(Window * self, void * closure) {
-	RECT rect;
-	POINT mouse;
-	GetCursorPos(&mouse);
-	ScreenToClient(self->hwnd, &mouse);
-	GetClientRect(self->hwnd, &rect);
-	PyObject * x = PyLong_FromLong(mouse.x);
-	PyObject * y = PyLong_FromLong(rect.bottom - rect.top - mouse.y - 1);
-	PyObject * result = PyTuple_New(2);
-	PyTuple_SET_ITEM(result, 0, x);
-	PyTuple_SET_ITEM(result, 1, y);
-	return result;
+	if (self->grab_mouse) {
+		PyObject * x = PyLong_FromLong(self->mouse_delta_x);
+		PyObject * y = PyLong_FromLong(self->mouse_delta_y);
+		PyObject * result = PyTuple_New(2);
+		PyTuple_SET_ITEM(result, 0, x);
+		PyTuple_SET_ITEM(result, 1, y);
+		return result;
+	} else {
+		RECT rect;
+		POINT mouse;
+		GetCursorPos(&mouse);
+		ScreenToClient(self->hwnd, &mouse);
+		GetClientRect(self->hwnd, &rect);
+		PyObject * x = PyLong_FromLong(mouse.x);
+		PyObject * y = PyLong_FromLong(rect.bottom - rect.top - mouse.y - 1);
+		PyObject * result = PyTuple_New(2);
+		PyTuple_SET_ITEM(result, 0, x);
+		PyTuple_SET_ITEM(result, 1, y);
+		return result;
+	}
 }
 
 PyObject * Window_get_mouse_delta(Window * self, void * closure) {

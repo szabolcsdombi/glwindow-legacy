@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- `mouse` property returns the `mouse_delta` when `grab_mouse` is true.
+- `mouse_delta` is deprecated.
+
 ### Fixed
 
 - division by zero when height is zero.
