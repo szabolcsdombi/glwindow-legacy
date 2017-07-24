@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- memory leaks.
+
 ## [2.3.0] - 2017-07-10
 
 ### Fixed
