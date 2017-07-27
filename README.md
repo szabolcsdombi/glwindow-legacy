@@ -32,7 +32,7 @@ python -m GLWindow
 
 ## Description
 
-GLWindow was build for windows to support [ModernGL] examples.
+GLWindow was built for windows to support [ModernGL] examples.
 Easy to use and great for commertial projects.
 [MIT] License.
 
