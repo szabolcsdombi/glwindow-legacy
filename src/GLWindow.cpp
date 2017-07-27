@@ -275,7 +275,7 @@ PyObject * Window_update(Window * self) {
 
 		if (self->hwnd == GetForegroundWindow()) {
 			if (self->grab_mouse) {
-				RECT rect;
+				RECT rect = {};
 				GetWindowRect(self->hwnd, &rect);
 				int cx = (rect.left + rect.right) / 2;
 				int cy = (rect.top + rect.bottom) / 2;
@@ -404,7 +404,7 @@ PyObject * Window_grab_mouse(Window * self, PyObject * args) {
 	bool grab_bool = grab ? true : false;
 
 	if (grab_bool ^ self->grab_mouse) {
-		RECT rect;
+		RECT rect = {};
 		GetWindowRect(self->hwnd, &rect);
 		int cx = (rect.left + rect.right) / 2;
 		int cy = (rect.top + rect.bottom) / 2;
@@ -628,8 +628,8 @@ PyObject * Window_get_mouse(Window * self, void * closure) {
 		PyTuple_SET_ITEM(result, 1, y);
 		return result;
 	} else {
-		RECT rect;
-		POINT mouse;
+		RECT rect = {};
+		POINT mouse = {};
 		GetCursorPos(&mouse);
 		ScreenToClient(self->hwnd, &mouse);
 		GetClientRect(self->hwnd, &rect);
@@ -643,19 +643,19 @@ PyObject * Window_get_mouse(Window * self, void * closure) {
 }
 
 PyObject * Window_get_width(Window * self, void * closure) {
-	RECT rect;
+	RECT rect = {};
 	GetClientRect(self->hwnd, &rect);
 	return PyLong_FromLong(positive(rect.right - rect.left));
 }
 
 PyObject * Window_get_height(Window * self, void * closure) {
-	RECT rect;
+	RECT rect = {};
 	GetClientRect(self->hwnd, &rect);
 	return PyLong_FromLong(positive(rect.bottom - rect.top));
 }
 
 PyObject * Window_get_viewport(Window * self, void * closure) {
-	RECT rect;
+	RECT rect = {};
 	GetClientRect(self->hwnd, &rect);
 	PyObject * x = PyLong_FromLong(rect.left);
 	PyObject * y = PyLong_FromLong(rect.top);
