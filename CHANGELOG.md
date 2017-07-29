@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [2.3.2]
+
+### Fixed
+
+- client rect query after the window was destroy.
+
 ## [2.3.1]
 
 ### Changed
