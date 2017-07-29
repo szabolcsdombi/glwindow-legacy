@@ -43,6 +43,8 @@ struct Window {
 	HDC hdc;
 	HGLRC hrc;
 
+	RECT client_rect;
+
 	int width;
 	int height;
 
@@ -210,6 +212,8 @@ PyObject * Window_update(Window * self) {
 	if (!self->show) {
 		Window_Show(self);
 	}
+
+	GetClientRect(self->hwnd, &self->client_rect);
 
 	long long now;
 	QueryPerformanceCounter((LARGE_INTEGER *)&now);
@@ -643,24 +647,18 @@ PyObject * Window_get_mouse(Window * self, void * closure) {
 }
 
 PyObject * Window_get_width(Window * self, void * closure) {
-	RECT rect = {};
-	GetClientRect(self->hwnd, &rect);
-	return PyLong_FromLong(positive(rect.right - rect.left));
+	return PyLong_FromLong(positive(self->client_rect.right - self->client_rect.left));
 }
 
 PyObject * Window_get_height(Window * self, void * closure) {
-	RECT rect = {};
-	GetClientRect(self->hwnd, &rect);
-	return PyLong_FromLong(positive(rect.bottom - rect.top));
+	return PyLong_FromLong(positive(self->client_rect.bottom - self->client_rect.top));
 }
 
 PyObject * Window_get_viewport(Window * self, void * closure) {
-	RECT rect = {};
-	GetClientRect(self->hwnd, &rect);
-	PyObject * x = PyLong_FromLong(rect.left);
-	PyObject * y = PyLong_FromLong(rect.top);
-	PyObject * width = PyLong_FromLong(positive(rect.right - rect.left));
-	PyObject * height = PyLong_FromLong(positive(rect.bottom - rect.top));
+	PyObject * x = PyLong_FromLong(self->client_rect.left);
+	PyObject * y = PyLong_FromLong(self->client_rect.top);
+	PyObject * width = PyLong_FromLong(positive(self->client_rect.right - self->client_rect.left));
+	PyObject * height = PyLong_FromLong(positive(self->client_rect.bottom - self->client_rect.top));
 	PyObject * result = PyTuple_New(4);
 	PyTuple_SET_ITEM(result, 0, x);
 	PyTuple_SET_ITEM(result, 1, y);
@@ -1078,6 +1076,11 @@ Window * meth_create_window(PyObject * self, PyObject * args) {
 	window->hwnd = 0;
 	window->hdc = 0;
 	window->hrc = 0;
+
+	window->client_rect.left = 0;
+	window->client_rect.right = 0;
+	window->client_rect.top = 0;
+	window->client_rect.bottom = 0;
 
 	window->width = 0;
 	window->height = 0;
