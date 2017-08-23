@@ -1155,6 +1155,8 @@ Window * meth_create_window(PyObject * self, PyObject * args) {
 		SwapBuffers(window->hdc);
 	}
 
+	GetClientRect(window->hwnd, &window->client_rect);
+
 	QueryPerformanceFrequency((LARGE_INTEGER *)&window->timer_frequency);
 	QueryPerformanceCounter((LARGE_INTEGER *)&window->timer_counter);
 	window->timer_last_counter = window->timer_counter;
