@@ -203,10 +203,10 @@ HGLRC CreateModernContext(HDC hdc, int samples) {
 			samples /= 2;
 		}
 
-		int major[] = {4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 0};
-		int minor[] = {5, 4, 3, 2, 1, 0, 3, 2, 1, 0, 0};
+		int major[] = {4, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 0};
+		int minor[] = {6, 5, 4, 3, 2, 1, 0, 3, 2, 1, 0, 0};
 
-		for (int i = 0; i < 10; ++i) {
+		for (int i = 0; i < 11; ++i) {
 			int attriblist[] = {
 				WGL_CONTEXT_PROFILE_MASK, WGL_CONTEXT_CORE_PROFILE_BIT,
 				WGL_CONTEXT_MAJOR_VERSION, major[i],
