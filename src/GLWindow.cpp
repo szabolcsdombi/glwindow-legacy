@@ -69,6 +69,8 @@ struct Window {
 
 	int mouse_delta_x;
 	int mouse_delta_y;
+	int mouse_delta_w;
+	int mouse_wheel;
 
 	int frames;
 	int seconds;
@@ -292,6 +294,8 @@ PyObject * Window_update(Window * self) {
 				self->mouse_delta_x = 0;
 				self->mouse_delta_y = 0;
 			}
+			self->mouse_wheel = self->mouse_delta_w;
+			self->mouse_delta_w = 0;
 
 			if (!self->disable_hotkeys && self->key_state[VK_CONTROL] != KEY_UP && self->key_state[VK_SHIFT] != KEY_UP) {
 				if (self->key_state['Q'] == KEY_PRESSED) {
@@ -646,6 +650,10 @@ PyObject * Window_get_mouse(Window * self, void * closure) {
 	}
 }
 
+PyObject * Window_get_mouse_wheel(Window * self, void * closure) {
+	return PyLong_FromLong(self->mouse_wheel);
+}
+
 PyObject * Window_get_width(Window * self, void * closure) {
 	return PyLong_FromLong(positive(self->client_rect.right - self->client_rect.left));
 }
@@ -748,6 +756,7 @@ PyObject * Window_get_text_input(Window * self, void * closure) {
 
 PyGetSetDef Window_tp_getseters[] = {
 	{(char *)"mouse", (getter)Window_get_mouse, 0, 0, 0},
+	{(char *)"mouse_wheel", (getter)Window_get_mouse_wheel, 0, 0, 0},
 	{(char *)"width", (getter)Window_get_width, 0, 0, 0},
 	{(char *)"height", (getter)Window_get_height, 0, 0, 0},
 	{(char *)"viewport", (getter)Window_get_viewport, 0, 0, 0},
@@ -842,6 +851,10 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 		}
 		case WM_MBUTTONUP: {
 			window->key_down[3] = false;
+			break;
+		}
+		case WM_MOUSEWHEEL: {
+			window->mouse_delta_w += GET_WHEEL_DELTA_WPARAM(wParam);
 			break;
 		}
 		case WM_KEYDOWN: {
@@ -1113,6 +1126,8 @@ Window * meth_create_window(PyObject * self, PyObject * args) {
 
 	window->mouse_delta_x = 0;
 	window->mouse_delta_y = 0;
+	window->mouse_delta_w = 0;
+	window->mouse_wheel = 0;
 
 	window->frames = 0;
 	window->seconds = 0;

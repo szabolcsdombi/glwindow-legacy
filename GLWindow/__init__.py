@@ -42,7 +42,7 @@ __all__ = [
     'Window', 'create_window', 'get_window', 'keys',
 ]
 
-__version__ = '2.3.3'
+__version__ = '2.3.4'
 
 
 class Window:
@@ -178,6 +178,14 @@ class Window:
         '''
 
         return self.wnd.mouse
+
+    @property
+    def mouse_wheel(self) -> int:
+        '''
+            tuple: The mouse wheel delta of the window.
+        '''
+
+        return self.wnd.mouse_wheel
 
     @property
     def mouse_delta(self) -> Tuple[int, int]:
