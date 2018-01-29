@@ -209,7 +209,9 @@ PyObject * Window_windowed(Window * self, PyObject * args) {
 }
 
 PyObject * Window_update(Window * self) {
+	Py_BEGIN_ALLOW_THREADS
 	SwapBuffers(self->hdc);
+	Py_END_ALLOW_THREADS
 
 	if (!self->show) {
 		Window_Show(self);
