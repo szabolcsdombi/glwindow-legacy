@@ -19,8 +19,8 @@ project = 'GLWindow'
 copyright = '2017, Szabolcs Dombi'
 author = 'Szabolcs Dombi'
 
-version = '2.3.5'
-release = '2.3.5'
+version = '2.4.0'
+release = '2.4.0'
 
 language = None
 
