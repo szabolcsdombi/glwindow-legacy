@@ -312,6 +312,24 @@ PyObject * Window_make_current(Window * self) {
 	return 0;
 }
 
+PyObject * Window_show_fps(Window * self, PyObject * args) {
+	int fps;
+
+	int args_ok = PyArg_ParseTuple(
+		args,
+		"p",
+		&fps
+	);
+
+	if (!args_ok) {
+		return 0;
+	}
+
+	self->show_fps = fps ? true : false;
+
+	Py_RETURN_NONE;
+}
+
 PyObject * Window_grab_mouse(Window * self, PyObject * args) {
 	int grab;
 
@@ -540,6 +558,7 @@ PyMethodDef Window_tp_methods[] = {
 	{"grab_mouse", (PyCFunction)Window_grab_mouse, METH_VARARGS, 0},
 	{"set_icon", (PyCFunction)Window_set_icon, METH_VARARGS, 0},
 	{"set_small_icon", (PyCFunction)Window_set_small_icon, METH_VARARGS, 0},
+	{"show_fps", (PyCFunction)Window_show_fps, METH_VARARGS, 0},
 	{0},
 };
 
