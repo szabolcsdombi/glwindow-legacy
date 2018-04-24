@@ -298,91 +298,6 @@ PyObject * Window_update(Window * self) {
 			}
 			self->mouse_wheel = self->mouse_delta_w;
 			self->mouse_delta_w = 0;
-
-			if (!self->disable_hotkeys && self->key_state[VK_CONTROL] != KEY_UP && self->key_state[VK_SHIFT] != KEY_UP) {
-				if (self->key_state['Q'] == KEY_PRESSED) {
-					DestroyWindow(self->hwnd);
-				}
-
-				if (self->key_state['1'] == KEY_PRESSED) {
-					Py_XDECREF(Window_fullscreen(self));
-				}
-				if (self->key_state['2'] == KEY_PRESSED) {
-					PyObject * width = PyLong_FromLong(1920);
-					PyObject * height = PyLong_FromLong(1080);
-					PyObject * args = PyTuple_Pack(2, width, height);
-					Py_XDECREF(Window_windowed(self, args));
-					Py_DECREF(width);
-					Py_DECREF(height);
-					Py_DECREF(args);
-				}
-				if (self->key_state['3'] == KEY_PRESSED) {
-					PyObject * width = PyLong_FromLong(1600);
-					PyObject * height = PyLong_FromLong(900);
-					PyObject * args = PyTuple_Pack(2, width, height);
-					Py_XDECREF(Window_windowed(self, args));
-					Py_DECREF(width);
-					Py_DECREF(height);
-					Py_DECREF(args);
-				}
-				if (self->key_state['4'] == KEY_PRESSED) {
-					PyObject * width = PyLong_FromLong(1366);
-					PyObject * height = PyLong_FromLong(768);
-					PyObject * args = PyTuple_Pack(2, width, height);
-					Py_XDECREF(Window_windowed(self, args));
-					Py_DECREF(width);
-					Py_DECREF(height);
-					Py_DECREF(args);
-				}
-				if (self->key_state['5'] == KEY_PRESSED) {
-					PyObject * width = PyLong_FromLong(1280);
-					PyObject * height = PyLong_FromLong(720);
-					PyObject * args = PyTuple_Pack(2, width, height);
-					Py_XDECREF(Window_windowed(self, args));
-					Py_DECREF(width);
-					Py_DECREF(height);
-					Py_DECREF(args);
-				}
-				if (self->key_state['6'] == KEY_PRESSED) {
-					PyObject * width = PyLong_FromLong(1024);
-					PyObject * height = PyLong_FromLong(768);
-					PyObject * args = PyTuple_Pack(2, width, height);
-					Py_XDECREF(Window_windowed(self, args));
-					Py_DECREF(width);
-					Py_DECREF(height);
-					Py_DECREF(args);
-				}
-				if (self->key_state['7'] == KEY_PRESSED) {
-					PyObject * width = PyLong_FromLong(800);
-					PyObject * height = PyLong_FromLong(600);
-					PyObject * args = PyTuple_Pack(2, width, height);
-					Py_XDECREF(Window_windowed(self, args));
-					Py_DECREF(width);
-					Py_DECREF(height);
-					Py_DECREF(args);
-				}
-				if (self->key_state['8'] == KEY_PRESSED) {
-					PyObject * width = PyLong_FromLong(600);
-					PyObject * height = PyLong_FromLong(400);
-					PyObject * args = PyTuple_Pack(2, width, height);
-					Py_XDECREF(Window_windowed(self, args));
-					Py_DECREF(width);
-					Py_DECREF(height);
-					Py_DECREF(args);
-				}
-				if (self->key_state['9'] == KEY_PRESSED) {
-					PyObject * width = PyLong_FromLong(320);
-					PyObject * height = PyLong_FromLong(240);
-					PyObject * args = PyTuple_Pack(2, width, height);
-					Py_XDECREF(Window_windowed(self, args));
-					Py_DECREF(width);
-					Py_DECREF(height);
-					Py_DECREF(args);
-				}
-				if (self->key_state['F'] == KEY_PRESSED) {
-					self->show_fps = !self->show_fps;
-				}
-			}
 		}
 	}
 
@@ -723,23 +638,6 @@ int Window_set_vsync(Window * self, PyObject * value, void * closure) {
 	return 0;
 }
 
-PyObject * Window_get_debug_hotkeys(Window * self, void * closure) {
-	return PyBool_FromLong(!self->disable_hotkeys);
-}
-
-int Window_set_debug_hotkeys(Window * self, PyObject * value, void * closure) {
-	if (value == Py_True) {
-		self->disable_hotkeys = false;
-	} else if (value == Py_False) {
-		self->disable_hotkeys = true;
-	} else {
-		PyErr_Format(PyExc_Exception, "Unknown error in %s (%s:%d)", __FUNCTION__, __FILE__, __LINE__);
-		return -1;
-	}
-
-	return 0;
-}
-
 PyObject * Window_get_time(Window * self, void * closure) {
 	return PyFloat_FromDouble(self->elapsed);
 }
@@ -767,7 +665,6 @@ PyGetSetDef Window_tp_getseters[] = {
 	{(char *)"time", (getter)Window_get_time, 0, 0, 0},
 	{(char *)"time_delta", (getter)Window_get_time_delta, 0, 0, 0},
 	{(char *)"text_input", (getter)Window_get_text_input, 0, 0, 0},
-	{(char *)"debug_hotkeys", (getter)Window_get_debug_hotkeys, (setter)Window_set_debug_hotkeys, 0, 0},
 	{0},
 };
 
