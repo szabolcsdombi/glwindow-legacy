@@ -301,7 +301,7 @@ class Window:
             list: The keys down.
         '''
 
-        return [keys.KEY_NAME.get(i, '%02X' % i) for i in range(256) if self.key_down(i)]
+        return self.wnd.keys
 
 
 def create_window(size=None, samples=16, *, fullscreen=False, title=None, threaded=True) -> Window:

@@ -60,6 +60,7 @@ struct Window {
 
 	bool key_down[256];
 	KeyState key_state[256];
+	PyObject * keys_lst;
 
 	wchar_t text_input[2][256];
 	int text_input_prefix;
@@ -271,6 +272,26 @@ PyObject * Window_update(Window * self) {
 				case KEY_UP:
 					self->key_state[i] = self->key_down[i] ? KEY_PRESSED : KEY_UP;
 					break;
+			}
+		}
+
+		int keys = 0;
+		for (int i = 0; i < 256; ++i) {
+			if (self->key_state[i] != KEY_UP) {
+				keys++;
+			}
+		}
+
+		Py_DECREF(self->keys_lst);
+		self->keys_lst = PyList_New(keys);
+		keys = 0;
+
+		for (int i = 0; i < 256; ++i) {
+			if (self->key_state[i] != KEY_UP) {
+				PyObject * tup = PyTuple_New(2);
+				PyTuple_SET_ITEM(tup, 0, PyLong_FromLong(i));
+				PyTuple_SET_ITEM(tup, 1, PyLong_FromLong(self->key_state[i]));
+				PyList_SET_ITEM(self->keys_lst, keys++, tup);
 			}
 		}
 
@@ -672,6 +693,11 @@ PyObject * Window_get_text_input(Window * self, void * closure) {
 	return PyUnicode_FromUnicode(text, self->text_input_size);
 }
 
+PyObject * Window_get_keys(Window * self, void * closure) {
+	Py_INCREF(self->keys_lst);
+	return self->keys_lst;
+}
+
 PyGetSetDef Window_tp_getseters[] = {
 	{(char *)"mouse", (getter)Window_get_mouse, 0, 0, 0},
 	{(char *)"mouse_wheel", (getter)Window_get_mouse_wheel, 0, 0, 0},
@@ -683,6 +709,7 @@ PyGetSetDef Window_tp_getseters[] = {
 	{(char *)"time", (getter)Window_get_time, 0, 0, 0},
 	{(char *)"time_delta", (getter)Window_get_time_delta, 0, 0, 0},
 	{(char *)"text_input", (getter)Window_get_text_input, 0, 0, 0},
+	{(char *)"keys", (getter)Window_get_keys, 0, 0, 0},
 	{0},
 };
 
@@ -1023,18 +1050,19 @@ Window * meth_create_window(PyObject * self, PyObject * args) {
 	window->show = false;
 	window->grab_mouse = false;
 	window->show_fps = false;
+	window->keys_lst = PyList_New(0);
 
 	for (int i = 0; i < 256; ++i) {
 		window->key_down[i] = false;
 	}
 
 	for (int i = 0; i < 256; ++i) {
-		window->key_state[256] = KEY_UP;
+		window->key_state[i] = KEY_UP;
 	}
 
 	for (int i = 0; i < 256; ++i) {
-		window->text_input[0][256] = 0;
-		window->text_input[1][256] = 0;
+		window->text_input[0][i] = 0;
+		window->text_input[1][i] = 0;
 	}
 
 	window->text_input_size = 0;
