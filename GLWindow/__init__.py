@@ -147,6 +147,16 @@ class Window:
 
         return self.wnd.key_up(key)
 
+    def show_fps(self, show):
+        '''
+            Show fps.
+
+            Args:
+                show (bool): Show fps.
+        '''
+
+        self.wnd.show_fps(show)
+
     def set_icon(self, filename):
         '''
             Set the window icon.
@@ -284,18 +294,6 @@ class Window:
         '''
 
         return self.wnd.text_input
-
-    @property
-    def debug_hotkeys(self) -> bool:
-        '''
-            bool: Debug hotkeys enable flag.
-        '''
-
-        return self.wnd.debug_hotkeys
-
-    @debug_hotkeys.setter
-    def debug_hotkeys(self, value):
-        self.wnd.debug_hotkeys = value
 
     @property
     def keys(self) -> List[str]:
