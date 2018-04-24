@@ -55,7 +55,6 @@ struct Window {
 	double elapsed;
 
 	bool show;
-	bool disable_hotkeys;
 	bool grab_mouse;
 	bool show_fps;
 
@@ -1003,7 +1002,6 @@ Window * meth_create_window(PyObject * self, PyObject * args) {
 	window->elapsed = 0.0;
 
 	window->show = false;
-	window->disable_hotkeys = false;
 	window->grab_mouse = false;
 	window->show_fps = false;
 
