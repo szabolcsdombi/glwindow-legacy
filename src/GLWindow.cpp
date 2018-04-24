@@ -745,11 +745,11 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 			break;
 		}
 		case WM_MBUTTONDOWN: {
-			window->key_down[3] = true;
+			window->key_down[4] = true;
 			break;
 		}
 		case WM_MBUTTONUP: {
-			window->key_down[3] = false;
+			window->key_down[4] = false;
 			break;
 		}
 		case WM_MOUSEWHEEL: {
