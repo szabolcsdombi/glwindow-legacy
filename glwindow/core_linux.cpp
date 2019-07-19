@@ -33,7 +33,7 @@ struct MyWindow {
 };
 
 int keyid(int code) {
-	switch (code) {
+    switch (code) {
         case 37: return 1;
         case 64: return 2;
         case 50: return 3;
@@ -112,8 +112,8 @@ int keyid(int code) {
         case 95: return 73;
         case 96: return 74;
 
-		default: return 0;
-	}
+        default: return 0;
+    }
 }
 
 bool create_window(void * arg) {
@@ -259,8 +259,8 @@ bool update_window(void * arg) {
     RawData * data = (RawData *)arg;
     MyWindow * window = (MyWindow *)data->window;
 
-	if (data->grab != data->old_grab) {
-		if (data->grab) {
+    if (data->grab != data->old_grab) {
+        if (data->grab) {
             int temp;
             unsigned mask;
             Window temp_window;
@@ -327,13 +327,13 @@ bool update_window(void * arg) {
     Window temp_window;
     XQueryPointer(window->display, window->window, &temp_window, &temp_window, &temp, &temp, &mx, &my, &mask);
 
-	if (data->grab) {
-		data->dmx = mx - data->width / 2;
-		data->dmy = my - data->height / 2;
-	} else {
-		data->mx = mx;
-		data->my = my;
-	}
+    if (data->grab) {
+        data->dmx = mx - data->width / 2;
+        data->dmy = my - data->height / 2;
+    } else {
+        data->mx = mx;
+        data->my = my;
+    }
 
     timespec now;
     clock_gettime(CLOCK_REALTIME, &now);

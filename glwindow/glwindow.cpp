@@ -91,7 +91,7 @@ PyObject * Window_meth_update(Window * self) {
         Py_DECREF(self->text_input);
         self->text_input = PyUnicode_FromWideChar(self->raw.text_input, self->raw.text_input_size);
     }
-	self->raw.old_grab = self->raw.grab;
+    self->raw.old_grab = self->raw.grab;
     self->raw.text_input_size = 0;
     return res;
 }
