@@ -22,6 +22,19 @@ extra_linker_args = {
     # 'darwin': ['-framework', 'OpenGL', '-Wno-deprecated'],
 }
 
+sources = {
+    'windows': [
+        'glwindow/glwindow.cpp',
+        'glwindow/core_windows.cpp',
+        'res/glwindow.rc',
+    ],
+    'linux': [
+        'glwindow/glwindow.cpp',
+        'glwindow/core_linux.cpp',
+    ],
+    # 'darwin': [],
+}
+
 target = platform.system().lower()
 
 if target not in PLATFORMS:
@@ -31,11 +44,7 @@ long_description = open('README.md').read()
 
 glwindow = Extension(
     name='glwindow',
-    sources=[
-        'glwindow/glwindow.cpp',
-        'glwindow/core_%s.cpp' % target,
-        'res/glwindow.rc',
-    ],
+    sources=sources[target],
     extra_compile_args=extra_compile_args[target],
     extra_linker_args=extra_linker_args[target],
     libraries=libraries[target],
