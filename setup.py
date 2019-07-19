@@ -16,7 +16,7 @@ extra_compile_args = {
     # 'darwin': ['-Wno-deprecated-declarations'],
 }
 
-extra_linker_args = {
+extra_link_args = {
     'windows': [],
     'linux': [],
     # 'darwin': ['-framework', 'OpenGL', '-Wno-deprecated'],
@@ -46,7 +46,7 @@ glwindow = Extension(
     name='glwindow',
     sources=sources[target],
     extra_compile_args=extra_compile_args[target],
-    extra_linker_args=extra_linker_args[target],
+    extra_link_args=extra_link_args[target],
     libraries=libraries[target],
 )
 
