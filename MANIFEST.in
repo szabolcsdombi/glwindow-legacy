@@ -1,7 +1,0 @@
-recursive-include src *.cpp *.hpp
-include .pylintrc
-include CHANGELOG.md
-include LICENSE
-include pytest.ini
-include README.md
-include tox.ini
