@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [3.0.0]
+
+New implementation with Windows and Linux support.
+
 ## [2.3.3]
 
 ### Fixed
@@ -114,16 +118,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [1.0.0] - 2016-08-29
 
-[Unreleased]: https://github.com/cprogrammer1994/GLWindow/compare/2.3.3...master
-[2.3.3]: https://github.com/cprogrammer1994/GLWindow/compare/2.3.2...2.3.3
-[2.3.2]: https://github.com/cprogrammer1994/GLWindow/compare/2.3.1...2.3.2
-[2.3.1]: https://github.com/cprogrammer1994/GLWindow/compare/2.3.0...2.3.1
-[2.3.0]: https://github.com/cprogrammer1994/GLWindow/compare/2.2.1...2.3.0
-[2.2.1]: https://github.com/cprogrammer1994/GLWindow/compare/2.2.0...2.2.1
-[2.2.0]: https://github.com/cprogrammer1994/GLWindow/compare/2.1.2...2.2.0
-[2.1.2]: https://github.com/cprogrammer1994/GLWindow/compare/2.1.1...2.1.2
-[2.1.1]: https://github.com/cprogrammer1994/GLWindow/compare/2.1.0...2.1.1
-[2.1.0]: https://github.com/cprogrammer1994/GLWindow/compare/2.0.4...2.1.0
-[2.0.4]: https://github.com/cprogrammer1994/GLWindow/compare/2.0.3...2.0.4
-[2.0.3]: https://github.com/cprogrammer1994/GLWindow/tree/2.0.3
-[1.0.0]: https://github.com/cprogrammer1994/GLWindow/tree/1.0.0
+[Unreleased]: https://github.com/cprogrammer1994/glwindow/compare/3.0.0...master
+[3.0.0]: https://github.com/cprogrammer1994/glwindow/tree/2.0.3
+[2.3.3]: https://github.com/cprogrammer1994/glwindow/compare/2.3.2...2.3.3
+[2.3.2]: https://github.com/cprogrammer1994/glwindow/compare/2.3.1...2.3.2
+[2.3.1]: https://github.com/cprogrammer1994/glwindow/compare/2.3.0...2.3.1
+[2.3.0]: https://github.com/cprogrammer1994/glwindow/compare/2.2.1...2.3.0
+[2.2.1]: https://github.com/cprogrammer1994/glwindow/compare/2.2.0...2.2.1
+[2.2.0]: https://github.com/cprogrammer1994/glwindow/compare/2.1.2...2.2.0
+[2.1.2]: https://github.com/cprogrammer1994/glwindow/compare/2.1.1...2.1.2
+[2.1.1]: https://github.com/cprogrammer1994/glwindow/compare/2.1.0...2.1.1
+[2.1.0]: https://github.com/cprogrammer1994/glwindow/compare/2.0.4...2.1.0
+[2.0.4]: https://github.com/cprogrammer1994/glwindow/compare/2.0.3...2.0.4
+[2.0.3]: https://github.com/cprogrammer1994/glwindow/tree/2.0.3
+[1.0.0]: https://github.com/cprogrammer1994/glwindow/tree/1.0.0
