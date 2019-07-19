@@ -19,6 +19,8 @@ struct MyWindow {
     HWND hwnd;
     HDC hdc;
     HGLRC hrc;
+	long long freq;
+	long long start;
 };
 
 PIXELFORMATDESCRIPTOR pfd = {sizeof(PIXELFORMATDESCRIPTOR), 1, PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_GENERIC_ACCELERATED | PFD_DOUBLEBUFFER, 0, 24};
@@ -251,6 +253,9 @@ bool create_window(void * arg) {
 
     wglSwapIntervalEXT(1);
 
+	QueryPerformanceFrequency((LARGE_INTEGER *)&window->freq);
+	QueryPerformanceCounter((LARGE_INTEGER *)&window->start);
+
     data->window = window;
 
     ShowWindow(window->hwnd, SW_SHOW);
@@ -305,6 +310,10 @@ bool update_window(void * arg) {
 		data->mx = point.x - rect.left;
 		data->my = point.y - rect.top;
 	}
+
+	long long now;
+	QueryPerformanceCounter((LARGE_INTEGER *)&now);
+	data->time = (double)(now - window->start) / window->freq;
 
     return alive;
 }
