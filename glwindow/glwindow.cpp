@@ -175,6 +175,7 @@ PyGetSetDef Window_getset[] = {
 PyMemberDef Window_members[] = {
     {"data", T_OBJECT_EX, offsetof(Window, data), READONLY, NULL},
     {"size", T_OBJECT_EX, offsetof(Window, size), READONLY, NULL},
+    {"time", T_DOUBLE, offsetof(Window, raw.time), READONLY, NULL},
     {"text_input", T_OBJECT_EX, offsetof(Window, text_input), READONLY, NULL},
     {},
 };

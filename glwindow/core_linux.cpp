@@ -28,6 +28,7 @@ struct MyWindow {
     GLXContext context;
     Atom delete_message;
     Cursor hidden_cursor;
+    timespec start;
     int events;
 };
 
@@ -248,6 +249,8 @@ bool create_window(void * arg) {
     Pixmap empty_bitmap = XCreateBitmapFromData(window->display, window->window, empty_icon, 8, 8);
     window->hidden_cursor = XCreatePixmapCursor(window->display, empty_bitmap, empty_bitmap, &black, &black, 0, 0);
 
+    clock_gettime(CLOCK_REALTIME, &window->start);
+
     data->window = window;
     return true;
 }
@@ -331,6 +334,10 @@ bool update_window(void * arg) {
 		data->mx = mx;
 		data->my = my;
 	}
+
+    timespec now;
+    clock_gettime(CLOCK_REALTIME, &now);
+    data->time = (now.tv_sec - window->start.tv_sec) + (now.tv_nsec - window->start.tv_nsec) / 1e9;
 
     return alive;
 }
