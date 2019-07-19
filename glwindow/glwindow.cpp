@@ -63,7 +63,12 @@ Window * glwindow_meth_window(PyObject * self, PyObject * args, PyObject * kwarg
     window->raw.width = width;
     window->raw.height = height;
     window->raw.glversion = glversion;
+
+    #ifdef __linux__
+    window->raw.title = strdup(title ? PyUnicode_AsUTF8(title) : "glwindow");
+    #else
     window->raw.title = title ? PyUnicode_AsWideCharString(title, NULL) : L"glwindow";
+    #endif
 
     window->size = Py_BuildValue("ii", window->raw.width, window->raw.height);
     window->data = PyMemoryView_FromMemory((char *)&window->raw, sizeof(RawData), PyBUF_WRITE);
