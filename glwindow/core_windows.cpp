@@ -199,47 +199,43 @@ bool create_window(void * arg) {
         return false;
     }
 
-    HGLRC loader_hglrc = wglCreateContext(window->hdc);
-    if (!loader_hglrc) {
+   window->hrc = wglCreateContext(window->hdc);
+    if (!window->hrc) {
         PyErr_BadInternalCall();
         return false;
     }
 
-    if (!wglMakeCurrent(window->hdc, loader_hglrc)) {
-        PyErr_BadInternalCall();
-        return false;
+    if (data->glversion) {
+        if (!wglMakeCurrent(window->hdc, window->hrc)) {
+            PyErr_BadInternalCall();
+            return false;
+        }
+
+        PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
+        if (!wglCreateContextAttribsARB) {
+            PyErr_BadInternalCall();
+            return false;
+        }
+
+        if (!wglMakeCurrent(NULL, NULL)) {
+            PyErr_BadInternalCall();
+            return false;
+        }
+
+        if (!wglDeleteContext(window->hrc)) {
+            PyErr_BadInternalCall();
+            return false;
+        }
+
+        int attribs[] = {
+            WGL_CONTEXT_PROFILE_MASK, WGL_CONTEXT_CORE_PROFILE_BIT,
+            WGL_CONTEXT_MAJOR_VERSION, data->glversion / 100 % 10,
+            WGL_CONTEXT_MINOR_VERSION, data->glversion / 10 % 10,
+            0, 0,
+        };
+
+        window->hrc = wglCreateContextAttribsARB(window->hdc, NULL, attribs);
     }
-
-    PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
-    if (!wglCreateContextAttribsARB) {
-        PyErr_BadInternalCall();
-        return false;
-    }
-
-    PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
-    if (!wglSwapIntervalEXT) {
-        PyErr_BadInternalCall();
-        return false;
-    }
-
-    if (!wglMakeCurrent(NULL, NULL)) {
-        PyErr_BadInternalCall();
-        return false;
-    }
-
-    if (!wglDeleteContext(loader_hglrc)) {
-        PyErr_BadInternalCall();
-        return false;
-    }
-
-    int attribs[] = {
-        WGL_CONTEXT_PROFILE_MASK, WGL_CONTEXT_CORE_PROFILE_BIT,
-        WGL_CONTEXT_MAJOR_VERSION, data->glversion / 100 % 10,
-        WGL_CONTEXT_MINOR_VERSION, data->glversion / 10 % 10,
-        0, 0,
-    };
-
-    window->hrc = wglCreateContextAttribsARB(window->hdc, NULL, attribs);
 
     if (!window->hrc) {
         PyErr_BadInternalCall();
@@ -247,6 +243,12 @@ bool create_window(void * arg) {
     }
 
     if (!wglMakeCurrent(window->hdc, window->hrc)) {
+        PyErr_BadInternalCall();
+        return false;
+    }
+
+    PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
+    if (!wglSwapIntervalEXT) {
         PyErr_BadInternalCall();
         return false;
     }
