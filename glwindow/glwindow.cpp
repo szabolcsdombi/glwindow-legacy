@@ -53,7 +53,7 @@ Window * glwindow_meth_window(PyObject * self, PyObject * args, PyObject * kwarg
     PyObject * create_window = default_create_window;
     PyObject * update_window = default_update_window;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|(ii)si(OO)", keywords, &width, &height, &PyUnicode_Type, &title, &glversion, &create_window, &update_window)) {
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|(ii)O!i(OO)", keywords, &width, &height, &PyUnicode_Type, &title, &glversion, &create_window, &update_window)) {
         return NULL;
     }
 
