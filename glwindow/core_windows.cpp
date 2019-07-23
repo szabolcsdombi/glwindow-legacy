@@ -281,12 +281,6 @@ bool update_window(void * arg) {
         }
     }
 
-    if (data->grab) {
-        RECT rect;
-        GetWindowRect(window->hwnd, &rect);
-        SetCursorPos((rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2);
-    }
-
     bool alive = true;
     SwapBuffers(window->hdc);
 
@@ -304,6 +298,9 @@ bool update_window(void * arg) {
     GetCursorPos(&point);
     RECT rect;
     GetWindowRect(window->hwnd, &rect);
+    if (data->grab) {
+        SetCursorPos((rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2);
+    }
 
     if (data->grab) {
         data->dmx = point.x - (rect.left + rect.right) / 2;
