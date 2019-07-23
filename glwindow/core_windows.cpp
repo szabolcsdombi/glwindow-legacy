@@ -33,7 +33,7 @@ struct MyWindow {
     bool alive;
 };
 
-MyWindow * window;
+MyWindow window;
 
 PIXELFORMATDESCRIPTOR pfd = {sizeof(PIXELFORMATDESCRIPTOR), 1, PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_GENERIC_ACCELERATED | PFD_DOUBLEBUFFER, 0, 24};
 
@@ -85,84 +85,84 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             return 0;
         }
         case WM_DESTROY: {
-            EnterCriticalSection(&window->lock);
-            window->alive = false;
-            LeaveCriticalSection(&window->lock);
+            EnterCriticalSection(&window.lock);
+            window.alive = false;
+            LeaveCriticalSection(&window.lock);
             PostQuitMessage(0);
             return 0;
         }
         case WM_LBUTTONDOWN: {
-            EnterCriticalSection(&window->lock);
-            window->key_down[101] = true;
-            LeaveCriticalSection(&window->lock);
+            EnterCriticalSection(&window.lock);
+            window.key_down[101] = true;
+            LeaveCriticalSection(&window.lock);
             break;
         }
         case WM_LBUTTONUP: {
-            EnterCriticalSection(&window->lock);
-            window->key_down[101] = false;
-            LeaveCriticalSection(&window->lock);
+            EnterCriticalSection(&window.lock);
+            window.key_down[101] = false;
+            LeaveCriticalSection(&window.lock);
             break;
         }
         case WM_RBUTTONDOWN: {
-            EnterCriticalSection(&window->lock);
-            window->key_down[102] = true;
-            LeaveCriticalSection(&window->lock);
+            EnterCriticalSection(&window.lock);
+            window.key_down[102] = true;
+            LeaveCriticalSection(&window.lock);
             break;
         }
         case WM_RBUTTONUP: {
-            EnterCriticalSection(&window->lock);
-            window->key_down[102] = false;
-            LeaveCriticalSection(&window->lock);
+            EnterCriticalSection(&window.lock);
+            window.key_down[102] = false;
+            LeaveCriticalSection(&window.lock);
             break;
         }
         case WM_MBUTTONDOWN: {
-            EnterCriticalSection(&window->lock);
-            window->key_down[103] = true;
-            LeaveCriticalSection(&window->lock);
+            EnterCriticalSection(&window.lock);
+            window.key_down[103] = true;
+            LeaveCriticalSection(&window.lock);
             break;
         }
         case WM_MBUTTONUP: {
-            EnterCriticalSection(&window->lock);
-            window->key_down[103] = false;
-            LeaveCriticalSection(&window->lock);
+            EnterCriticalSection(&window.lock);
+            window.key_down[103] = false;
+            LeaveCriticalSection(&window.lock);
             break;
         }
         case WM_MOUSEWHEEL: {
-            EnterCriticalSection(&window->lock);
-            window->mouse_wheel += GET_WHEEL_DELTA_WPARAM(wParam);
-            LeaveCriticalSection(&window->lock);
+            EnterCriticalSection(&window.lock);
+            window.mouse_wheel += GET_WHEEL_DELTA_WPARAM(wParam);
+            LeaveCriticalSection(&window.lock);
             break;
         }
         case WM_KEYDOWN: {
-            EnterCriticalSection(&window->lock);
-            window->key_down[keyid((int)wParam)] = true;
-            LeaveCriticalSection(&window->lock);
+            EnterCriticalSection(&window.lock);
+            window.key_down[keyid((int)wParam)] = true;
+            LeaveCriticalSection(&window.lock);
             break;
         }
         case WM_KEYUP: {
-            EnterCriticalSection(&window->lock);
-            window->key_down[keyid((int)wParam)] = false;
-            LeaveCriticalSection(&window->lock);
+            EnterCriticalSection(&window.lock);
+            window.key_down[keyid((int)wParam)] = false;
+            LeaveCriticalSection(&window.lock);
             break;
         }
         case WM_CHAR: {
-            EnterCriticalSection(&window->lock);
-            if (window->text_input_size < 100) {
-                window->text_input[window->text_input_size++] = (wchar_t)wParam;
+            EnterCriticalSection(&window.lock);
+            if (window.text_input_size < 100) {
+                window.text_input[window.text_input_size++] = (wchar_t)wParam;
             }
-            LeaveCriticalSection(&window->lock);
+            LeaveCriticalSection(&window.lock);
             break;
         }
         case WM_SYSKEYDOWN:
         case WM_SYSKEYUP: {
-            EnterCriticalSection(&window->lock);
+            EnterCriticalSection(&window.lock);
             static bool sys_alt = false;
             if (wParam == VK_MENU) {
                 sys_alt = (uMsg == WM_SYSKEYDOWN);
             } else if (sys_alt && uMsg == WM_SYSKEYDOWN && wParam == VK_F4) {
                 DestroyWindow(hWnd);
             }
-            LeaveCriticalSection(&window->lock);
+            LeaveCriticalSection(&window.lock);
             return 0;
         }
         case WM_USER: {
@@ -175,6 +175,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
 void window_thread(void * arg) {
     RawData * data = (RawData *)arg;
+    data->window = &window;
 
     if (!hinst) {
         return;
@@ -206,34 +207,34 @@ void window_thread(void * arg) {
     int x = (sw - adjusted_width) / 2;
     int y = (sh - adjusted_height) / 2;
 
-    window->hwnd = CreateWindowEx(WS_EX_APPWINDOW, L"glwindow", (LPCWSTR)data->title, style, x, y, data->width, data->height, NULL, NULL, hinst, data);
+    window.hwnd = CreateWindowEx(WS_EX_APPWINDOW, L"glwindow", (LPCWSTR)data->title, style, x, y, data->width, data->height, NULL, NULL, hinst, data);
 
-    if (!window->hwnd) {
+    if (!window.hwnd) {
         return;
     }
 
-    window->hdc = GetDC(window->hwnd);
+    window.hdc = GetDC(window.hwnd);
 
-    if (!window->hdc) {
+    if (!window.hdc) {
         return;
     }
 
-    int pixelformat = ChoosePixelFormat(window->hdc, &pfd);
+    int pixelformat = ChoosePixelFormat(window.hdc, &pfd);
     if (!pixelformat) {
         return;
     }
 
-    if (!SetPixelFormat(window->hdc, pixelformat, &pfd)) {
+    if (!SetPixelFormat(window.hdc, pixelformat, &pfd)) {
         return;
     }
 
-   window->hrc = wglCreateContext(window->hdc);
-    if (!window->hrc) {
+   window.hrc = wglCreateContext(window.hdc);
+    if (!window.hrc) {
         return;
     }
 
     if (data->glversion) {
-        if (!wglMakeCurrent(window->hdc, window->hrc)) {
+        if (!wglMakeCurrent(window.hdc, window.hrc)) {
             return;
         }
 
@@ -246,7 +247,7 @@ void window_thread(void * arg) {
             return;
         }
 
-        if (!wglDeleteContext(window->hrc)) {
+        if (!wglDeleteContext(window.hrc)) {
             return;
         }
 
@@ -257,18 +258,17 @@ void window_thread(void * arg) {
             0, 0,
         };
 
-        window->hrc = wglCreateContextAttribsARB(window->hdc, NULL, attribs);
+        window.hrc = wglCreateContextAttribsARB(window.hdc, NULL, attribs);
     }
 
-    if (!window->hrc) {
+    if (!window.hrc) {
         return;
     }
 
-    data->window = window;
-    SetEvent(window->ready);
+    SetEvent(window.ready);
 
     MSG msg;
-	while (GetMessage(&msg, 0, 0, 0)) {
+	while (GetMessage(&msg, NULL, 0, 0)) {
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
@@ -276,27 +276,25 @@ void window_thread(void * arg) {
 
 
 bool create_window(void * arg) {
-    window = new MyWindow();
-
-    window->ready = CreateEvent(NULL, true, false, NULL);
-    InitializeCriticalSection(&window->lock);
-    window->alive = true;
+    window.ready = CreateEvent(NULL, true, false, NULL);
+    InitializeCriticalSection(&window.lock);
+    window.alive = true;
 
     HANDLE thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)window_thread, arg, 0, NULL);
 
     HANDLE objects[2] = {
-        window->ready,
+        window.ready,
         thread,
     };
 
     WaitForMultipleObjects(2, objects, false, INFINITE);
 
-    if (WaitForSingleObject(window->ready, 0)) {
+    if (WaitForSingleObject(window.ready, 0)) {
         PyErr_BadInternalCall();
         return false;
     }
 
-    if (!wglMakeCurrent(window->hdc, window->hrc)) {
+    if (!wglMakeCurrent(window.hdc, window.hrc)) {
         PyErr_BadInternalCall();
         return false;
     }
@@ -309,27 +307,27 @@ bool create_window(void * arg) {
 
     wglSwapIntervalEXT(1);
 
-    QueryPerformanceFrequency((LARGE_INTEGER *)&window->freq);
-    QueryPerformanceCounter((LARGE_INTEGER *)&window->start);
+    QueryPerformanceFrequency((LARGE_INTEGER *)&window.freq);
+    QueryPerformanceCounter((LARGE_INTEGER *)&window.start);
 
-    ShowWindow(window->hwnd, SW_SHOW);
-	SetForegroundWindow(window->hwnd);
-	SetActiveWindow(window->hwnd);
-	SetFocus(window->hwnd);
+    ShowWindow(window.hwnd, SW_SHOW);
+	SetForegroundWindow(window.hwnd);
+	SetActiveWindow(window.hwnd);
+	SetFocus(window.hwnd);
     return true;
 }
 
 bool update_window(void * arg) {
     RawData * data = (RawData *)arg;
 
-    EnterCriticalSection(&window->lock);
+    EnterCriticalSection(&window.lock);
 
-    if (!window->alive) {
-        LeaveCriticalSection(&window->lock);
+    if (!window.alive) {
+        LeaveCriticalSection(&window.lock);
         return false;
     }
 
-    SwapBuffers(window->hdc);
+    SwapBuffers(window.hdc);
 
     if (data->grab != data->old_grab) {
         if (data->grab) {
@@ -342,22 +340,22 @@ bool update_window(void * arg) {
         }
     }
 
-    memcpy(data->key_down, window->key_down, 110);
-    memcpy(data->text_input, window->text_input, window->text_input_size * 2);
-    data->text_input_size = window->text_input_size;
-    data->mw = window->mouse_wheel;
+    memcpy(data->key_down, window.key_down, 110);
+    memcpy(data->text_input, window.text_input, window.text_input_size * 2);
+    data->text_input_size = window.text_input_size;
+    data->mw = window.mouse_wheel;
 
-    LeaveCriticalSection(&window->lock);
+    LeaveCriticalSection(&window.lock);
 
     if (data->grab != data->old_grab) {
-        SendMessage(window->hwnd, WM_USER, data->grab, 0);
+        SendMessage(window.hwnd, WM_USER, data->grab, 0);
     }
 
     POINT point;
     GetCursorPos(&point);
 
     RECT rect;
-    GetWindowRect(window->hwnd, &rect);
+    GetWindowRect(window.hwnd, &rect);
 
     if (data->grab) {
         SetCursorPos((rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2);
@@ -370,7 +368,7 @@ bool update_window(void * arg) {
 
     long long now;
     QueryPerformanceCounter((LARGE_INTEGER *)&now);
-    data->time = (double)(now - window->start) / window->freq;
+    data->time = (double)(now - window.start) / window.freq;
     return true;
 }
 
