@@ -16,12 +16,24 @@ typedef BOOL (WINAPI * PFNWGLSWAPINTERVALEXTPROC)(int interval);
 HINSTANCE hinst;
 
 struct MyWindow {
+    CRITICAL_SECTION lock;
+    HANDLE ready;
+
     HWND hwnd;
     HDC hdc;
     HGLRC hrc;
+
+    bool key_down[110];
+    wchar_t text_input[100];
+    int text_input_size;
+    int mouse_wheel;
+
     long long freq;
     long long start;
+    bool alive;
 };
+
+MyWindow * window;
 
 PIXELFORMATDESCRIPTOR pfd = {sizeof(PIXELFORMATDESCRIPTOR), 1, PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_GENERIC_ACCELERATED | PFD_DOUBLEBUFFER, 0, 24};
 
@@ -67,84 +79,105 @@ int keyid(int code) {
 }
 
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    RawData * data = (RawData *)GetWindowLongPtr(hWnd, GWLP_USERDATA);
-
     switch (uMsg) {
-        case WM_CREATE: {
-            SetWindowLongPtr(hWnd, GWLP_USERDATA, (LPARAM)((CREATESTRUCT *)lParam)->lpCreateParams);
-            break;
-        }
         case WM_CLOSE: {
             DestroyWindow(hWnd);
             return 0;
         }
         case WM_DESTROY: {
+            EnterCriticalSection(&window->lock);
+            window->alive = false;
+            LeaveCriticalSection(&window->lock);
             PostQuitMessage(0);
             return 0;
         }
         case WM_LBUTTONDOWN: {
-            data->key_down[101] = true;
+            EnterCriticalSection(&window->lock);
+            window->key_down[101] = true;
+            LeaveCriticalSection(&window->lock);
             break;
         }
         case WM_LBUTTONUP: {
-            data->key_down[101] = false;
+            EnterCriticalSection(&window->lock);
+            window->key_down[101] = false;
+            LeaveCriticalSection(&window->lock);
             break;
         }
         case WM_RBUTTONDOWN: {
-            data->key_down[102] = true;
+            EnterCriticalSection(&window->lock);
+            window->key_down[102] = true;
+            LeaveCriticalSection(&window->lock);
             break;
         }
         case WM_RBUTTONUP: {
-            data->key_down[102] = false;
+            EnterCriticalSection(&window->lock);
+            window->key_down[102] = false;
+            LeaveCriticalSection(&window->lock);
             break;
         }
         case WM_MBUTTONDOWN: {
-            data->key_down[103] = true;
+            EnterCriticalSection(&window->lock);
+            window->key_down[103] = true;
+            LeaveCriticalSection(&window->lock);
             break;
         }
         case WM_MBUTTONUP: {
-            data->key_down[103] = false;
+            EnterCriticalSection(&window->lock);
+            window->key_down[103] = false;
+            LeaveCriticalSection(&window->lock);
             break;
         }
         case WM_MOUSEWHEEL: {
-            data->mw += GET_WHEEL_DELTA_WPARAM(wParam);
+            EnterCriticalSection(&window->lock);
+            window->mouse_wheel += GET_WHEEL_DELTA_WPARAM(wParam);
+            LeaveCriticalSection(&window->lock);
             break;
         }
         case WM_KEYDOWN: {
-            data->key_down[keyid((int)wParam)] = true;
+            EnterCriticalSection(&window->lock);
+            window->key_down[keyid((int)wParam)] = true;
+            LeaveCriticalSection(&window->lock);
             break;
         }
         case WM_KEYUP: {
-            data->key_down[keyid((int)wParam)] = false;
+            EnterCriticalSection(&window->lock);
+            window->key_down[keyid((int)wParam)] = false;
+            LeaveCriticalSection(&window->lock);
             break;
         }
         case WM_CHAR: {
-            if (data->text_input_size < 100) {
-                data->text_input[data->text_input_size++] = (wchar_t)wParam;
+            EnterCriticalSection(&window->lock);
+            if (window->text_input_size < 100) {
+                window->text_input[window->text_input_size++] = (wchar_t)wParam;
             }
+            LeaveCriticalSection(&window->lock);
             break;
         }
         case WM_SYSKEYDOWN:
         case WM_SYSKEYUP: {
+            EnterCriticalSection(&window->lock);
             static bool sys_alt = false;
             if (wParam == VK_MENU) {
                 sys_alt = (uMsg == WM_SYSKEYDOWN);
             } else if (sys_alt && uMsg == WM_SYSKEYDOWN && wParam == VK_F4) {
                 DestroyWindow(hWnd);
             }
+            LeaveCriticalSection(&window->lock);
+            return 0;
+        }
+        case WM_USER: {
+            ShowCursor(!wParam);
             return 0;
         }
     }
     return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 
-bool create_window(void * arg) {
+void window_thread(void * arg) {
     RawData * data = (RawData *)arg;
-    MyWindow * window = new MyWindow();
 
     if (!hinst) {
-        PyErr_BadInternalCall();
-        return false;
+        return;
     }
 
     HCURSOR hcursor = (HCURSOR)LoadCursor(NULL, IDC_ARROW);
@@ -154,8 +187,7 @@ bool create_window(void * arg) {
     WNDCLASSEXW wnd_class = {sizeof(WNDCLASSEXW), CS_OWNDC, WindowProc, 0, 0, hinst, hicon1, hcursor, NULL, NULL, L"glwindow", hicon2};
 
     if (!RegisterClassEx(&wnd_class)) {
-        PyErr_BadInternalCall();
-        return false;
+        return;
     }
 
     int style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU;
@@ -177,54 +209,45 @@ bool create_window(void * arg) {
     window->hwnd = CreateWindowEx(WS_EX_APPWINDOW, L"glwindow", (LPCWSTR)data->title, style, x, y, data->width, data->height, NULL, NULL, hinst, data);
 
     if (!window->hwnd) {
-        PyErr_BadInternalCall();
-        return false;
+        return;
     }
 
     window->hdc = GetDC(window->hwnd);
 
     if (!window->hdc) {
-        PyErr_BadInternalCall();
-        return false;
+        return;
     }
 
     int pixelformat = ChoosePixelFormat(window->hdc, &pfd);
     if (!pixelformat) {
-        PyErr_BadInternalCall();
-        return false;
+        return;
     }
 
     if (!SetPixelFormat(window->hdc, pixelformat, &pfd)) {
-        PyErr_BadInternalCall();
-        return false;
+        return;
     }
 
    window->hrc = wglCreateContext(window->hdc);
     if (!window->hrc) {
-        PyErr_BadInternalCall();
-        return false;
+        return;
     }
 
     if (data->glversion) {
         if (!wglMakeCurrent(window->hdc, window->hrc)) {
-            PyErr_BadInternalCall();
-            return false;
+            return;
         }
 
         PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
         if (!wglCreateContextAttribsARB) {
-            PyErr_BadInternalCall();
-            return false;
+            return;
         }
 
         if (!wglMakeCurrent(NULL, NULL)) {
-            PyErr_BadInternalCall();
-            return false;
+            return;
         }
 
         if (!wglDeleteContext(window->hrc)) {
-            PyErr_BadInternalCall();
-            return false;
+            return;
         }
 
         int attribs[] = {
@@ -238,6 +261,37 @@ bool create_window(void * arg) {
     }
 
     if (!window->hrc) {
+        return;
+    }
+
+    data->window = window;
+    SetEvent(window->ready);
+
+    MSG msg;
+	while (GetMessage(&msg, 0, 0, 0)) {
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+}
+
+
+bool create_window(void * arg) {
+    window = new MyWindow();
+
+    window->ready = CreateEvent(NULL, true, false, NULL);
+    InitializeCriticalSection(&window->lock);
+    window->alive = true;
+
+    HANDLE thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)window_thread, arg, 0, NULL);
+
+    HANDLE objects[2] = {
+        window->ready,
+        thread,
+    };
+
+    WaitForMultipleObjects(2, objects, false, INFINITE);
+
+    if (WaitForSingleObject(window->ready, 0)) {
         PyErr_BadInternalCall();
         return false;
     }
@@ -258,15 +312,24 @@ bool create_window(void * arg) {
     QueryPerformanceFrequency((LARGE_INTEGER *)&window->freq);
     QueryPerformanceCounter((LARGE_INTEGER *)&window->start);
 
-    data->window = window;
-
     ShowWindow(window->hwnd, SW_SHOW);
+	SetForegroundWindow(window->hwnd);
+	SetActiveWindow(window->hwnd);
+	SetFocus(window->hwnd);
     return true;
 }
 
 bool update_window(void * arg) {
     RawData * data = (RawData *)arg;
-    MyWindow * window = (MyWindow *)data->window;
+
+    EnterCriticalSection(&window->lock);
+
+    if (!window->alive) {
+        LeaveCriticalSection(&window->lock);
+        return false;
+    }
+
+    SwapBuffers(window->hdc);
 
     if (data->grab != data->old_grab) {
         if (data->grab) {
@@ -274,35 +337,30 @@ bool update_window(void * arg) {
             GetCursorPos(&point);
             data->mx = point.x;
             data->my = point.y;
-            ShowCursor(false);
         } else {
             SetCursorPos(data->mx, data->my);
-            ShowCursor(true);
         }
     }
 
-    bool alive = true;
-    SwapBuffers(window->hdc);
+    memcpy(data->key_down, window->key_down, 110);
+    memcpy(data->text_input, window->text_input, window->text_input_size * 2);
+    data->text_input_size = window->text_input_size;
+    data->mw = window->mouse_wheel;
 
-    MSG msg;
-    while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) > 0) {
-        if (msg.message == WM_QUIT) {
-            alive = false;
-            break;
-        }
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
+    LeaveCriticalSection(&window->lock);
+
+    if (data->grab != data->old_grab) {
+        SendMessage(window->hwnd, WM_USER, data->grab, 0);
     }
 
     POINT point;
     GetCursorPos(&point);
+
     RECT rect;
     GetWindowRect(window->hwnd, &rect);
-    if (data->grab) {
-        SetCursorPos((rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2);
-    }
 
     if (data->grab) {
+        SetCursorPos((rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2);
         data->dmx = point.x - (rect.left + rect.right) / 2;
         data->dmy = point.y - (rect.top + rect.bottom) / 2;
     } else {
@@ -313,8 +371,7 @@ bool update_window(void * arg) {
     long long now;
     QueryPerformanceCounter((LARGE_INTEGER *)&now);
     data->time = (double)(now - window->start) / window->freq;
-
-    return alive;
+    return true;
 }
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
