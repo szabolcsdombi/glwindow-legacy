@@ -329,12 +329,16 @@ bool update_window(void * arg) {
 
     SwapBuffers(window.hdc);
 
+    RECT rect;
+    GetWindowRect(window.hwnd, &rect);
+
     if (data->grab != data->old_grab) {
         if (data->grab) {
             POINT point;
             GetCursorPos(&point);
             data->mx = point.x;
             data->my = point.y;
+            SetCursorPos((rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2);
         } else {
             SetCursorPos(data->mx, data->my);
         }
@@ -353,9 +357,6 @@ bool update_window(void * arg) {
 
     POINT point;
     GetCursorPos(&point);
-
-    RECT rect;
-    GetWindowRect(window.hwnd, &rect);
 
     if (data->grab) {
         SetCursorPos((rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2);
