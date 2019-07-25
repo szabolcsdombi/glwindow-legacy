@@ -15,13 +15,16 @@ typedef BOOL (WINAPI * PFNWGLSWAPINTERVALEXTPROC)(int interval);
 
 HINSTANCE hinst;
 
-struct MyWindow {
+struct StaticWindow {
     CRITICAL_SECTION lock;
     HANDLE ready;
 
+    HANDLE thread;
     HWND hwnd;
     HDC hdc;
     HGLRC hrc;
+
+    const char * error;
 
     bool key_down[110];
     wchar_t text_input[100];
@@ -31,11 +34,7 @@ struct MyWindow {
     long long freq;
     long long start;
     bool alive;
-};
-
-MyWindow window;
-
-PIXELFORMATDESCRIPTOR pfd = {sizeof(PIXELFORMATDESCRIPTOR), 1, PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_GENERIC_ACCELERATED | PFD_DOUBLEBUFFER, 0, 24};
+} window;
 
 int keyid(int code) {
     if ('A' <= code && code <= 'Z') {
@@ -178,6 +177,8 @@ void window_thread(void * arg) {
     data->window = &window;
 
     if (!hinst) {
+        window.error = "hinstance is NULL";
+        SetEvent(window.ready);
         return;
     }
 
@@ -185,9 +186,13 @@ void window_thread(void * arg) {
     HCURSOR hicon1 = (HICON)LoadIcon(hinst, MAKEINTRESOURCE(10001));
     HCURSOR hicon2 = (HICON)LoadIcon(hinst, MAKEINTRESOURCE(10002));
 
-    WNDCLASSEXW wnd_class = {sizeof(WNDCLASSEXW), CS_OWNDC, WindowProc, 0, 0, hinst, hicon1, hcursor, NULL, NULL, L"glwindow", hicon2};
+    WNDCLASSEXW wnd_class = {
+        sizeof(WNDCLASSEXW), CS_OWNDC, WindowProc, 0, 0, hinst, hicon1, hcursor, NULL, NULL, L"glwindow", hicon2,
+    };
 
     if (!RegisterClassEx(&wnd_class)) {
+        window.error = "RegisterClassEx failed";
+        SetEvent(window.ready);
         return;
     }
 
@@ -201,53 +206,81 @@ void window_thread(void * arg) {
 
     AdjustWindowRect(&rect, style, false);
 
-    int adjusted_width = rect.right - rect.left;
-    int adjusted_height = rect.bottom - rect.top;
+    int width = rect.right - rect.left;
+    int height = rect.bottom - rect.top;
 
-    int x = (sw - adjusted_width) / 2;
-    int y = (sh - adjusted_height) / 2;
+    int x = (sw - width) / 2;
+    int y = (sh - height) / 2;
 
-    window.hwnd = CreateWindowEx(WS_EX_APPWINDOW, L"glwindow", (LPCWSTR)data->title, style, x, y, data->width, data->height, NULL, NULL, hinst, data);
+    window.hwnd = CreateWindowEx(
+        WS_EX_APPWINDOW, L"glwindow", (LPCWSTR)data->title, style, x, y, width, height, NULL, NULL, hinst, data
+    );
 
     if (!window.hwnd) {
+        window.error = "CreateWindowEx failed";
+        SetEvent(window.ready);
         return;
     }
 
     window.hdc = GetDC(window.hwnd);
-
     if (!window.hdc) {
+        window.error = "GetDC failed";
+        SetEvent(window.ready);
         return;
     }
 
+    PIXELFORMATDESCRIPTOR pfd = {
+        sizeof(PIXELFORMATDESCRIPTOR),
+        1,
+        PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_GENERIC_ACCELERATED | PFD_DOUBLEBUFFER,
+        0,
+        24,
+    };
+
     int pixelformat = ChoosePixelFormat(window.hdc, &pfd);
     if (!pixelformat) {
+        window.error = "ChoosePixelFormat failed";
+        SetEvent(window.ready);
         return;
     }
 
     if (!SetPixelFormat(window.hdc, pixelformat, &pfd)) {
+        window.error = "SetPixelFormat failed";
+        SetEvent(window.ready);
         return;
     }
 
    window.hrc = wglCreateContext(window.hdc);
     if (!window.hrc) {
+        window.error = "wglCreateContext failed";
+        SetEvent(window.ready);
         return;
     }
 
     if (data->glversion) {
         if (!wglMakeCurrent(window.hdc, window.hrc)) {
+            window.error = "wglMakeCurrent failed";
+            SetEvent(window.ready);
             return;
         }
 
-        PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
+        FARPROC proc = wglGetProcAddress("wglCreateContextAttribsARB");
+        PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)proc;
         if (!wglCreateContextAttribsARB) {
+            window.error = "wglCreateContextAttribsARB is missing";
+            SetEvent(window.ready);
             return;
         }
 
         if (!wglMakeCurrent(NULL, NULL)) {
+            window.error = "wglMakeCurrent failed";
+            SetEvent(window.ready);
             return;
         }
 
         if (!wglDeleteContext(window.hrc)) {
+            window.error = "wglDeleteContext failed";
+            SetEvent(window.ready);
             return;
         }
 
@@ -259,19 +292,20 @@ void window_thread(void * arg) {
         };
 
         window.hrc = wglCreateContextAttribsARB(window.hdc, NULL, attribs);
-    }
-
-    if (!window.hrc) {
-        return;
+        if (!window.hrc) {
+            window.error = "wglCreateContextAttribsARB failed";
+            SetEvent(window.ready);
+            return;
+        }
     }
 
     SetEvent(window.ready);
 
     MSG msg;
-	while (GetMessage(&msg, NULL, 0, 0)) {
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
-	}
+    while (GetMessage(&msg, NULL, 0, 0)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
 }
 
 
@@ -280,17 +314,11 @@ bool create_window(void * arg) {
     InitializeCriticalSection(&window.lock);
     window.alive = true;
 
-    HANDLE thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)window_thread, arg, 0, NULL);
+    window.thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)window_thread, arg, 0, NULL);
+    WaitForSingleObject(window.ready, INFINITE);
 
-    HANDLE objects[2] = {
-        window.ready,
-        thread,
-    };
-
-    WaitForMultipleObjects(2, objects, false, INFINITE);
-
-    if (WaitForSingleObject(window.ready, 0)) {
-        PyErr_BadInternalCall();
+    if (window.error) {
+        PyErr_Format(PyExc_Exception, window.error);
         return false;
     }
 
@@ -311,9 +339,9 @@ bool create_window(void * arg) {
     QueryPerformanceCounter((LARGE_INTEGER *)&window.start);
 
     ShowWindow(window.hwnd, SW_SHOW);
-	SetForegroundWindow(window.hwnd);
-	SetActiveWindow(window.hwnd);
-	SetFocus(window.hwnd);
+    SetForegroundWindow(window.hwnd);
+    SetActiveWindow(window.hwnd);
+    SetFocus(window.hwnd);
     return true;
 }
 
