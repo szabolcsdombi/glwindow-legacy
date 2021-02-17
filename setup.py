@@ -1,58 +1,16 @@
-import platform
-
-from setuptools import setup, Extension
-
-PLATFORMS = {'windows', 'linux'}
-
-libraries = {
-    'windows': ['gdi32', 'opengl32', 'user32'],
-    'linux': ['GL', 'X11'],
-    # 'darwin': [],
-}
-
-extra_compile_args = {
-    'windows': [],
-    'linux': ['-fpermissive'],
-    # 'darwin': ['-Wno-deprecated-declarations'],
-}
-
-extra_link_args = {
-    'windows': [],
-    'linux': [],
-    # 'darwin': ['-framework', 'OpenGL', '-Wno-deprecated'],
-}
-
-sources = {
-    'windows': [
-        'glwindow/glwindow.cpp',
-        'glwindow/core_windows.cpp',
-        'res/glwindow.rc',
-    ],
-    'linux': [
-        'glwindow/glwindow.cpp',
-        'glwindow/core_linux.cpp',
-    ],
-    # 'darwin': [],
-}
-
-target = platform.system().lower()
-
-if target not in PLATFORMS:
-    target = 'linux'
+from setuptools import Extension, setup
 
 long_description = open('README.md').read()
 
 glwindow = Extension(
     name='glwindow',
-    sources=sources[target],
-    extra_compile_args=extra_compile_args[target],
-    extra_link_args=extra_link_args[target],
-    libraries=libraries[target],
+    sources=['./glwindow.cpp'],
+    libraries=['user32'],
 )
 
 setup(
     name='glwindow',
-    version='3.0.0',
+    version='4.0.0',
     description='glwindow',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -61,5 +19,4 @@ setup(
     author_email='cprogrammer1994@gmail.com',
     license='MIT',
     ext_modules=[glwindow],
-    install_requires=['moderngl'],
 )

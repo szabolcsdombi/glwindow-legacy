@@ -1,4 +1,2 @@
-recursive-include glwindow *.*
-recursive-include res *.*
 include README.md
 include LICENSE
