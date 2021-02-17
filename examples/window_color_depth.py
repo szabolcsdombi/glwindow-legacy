@@ -2,7 +2,6 @@ import glnext
 import glwindow
 import miniglm
 from glnext_compiler import glsl
-from PIL import Image
 
 window1 = glwindow.window((512, 512), '8 bits')
 window2 = glwindow.window((512, 512), '10 bits')
