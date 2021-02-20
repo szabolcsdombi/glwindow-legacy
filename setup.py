@@ -1,12 +1,22 @@
+import sys
 from setuptools import Extension, setup
 
 long_description = open('README.md').read()
 
-glwindow = Extension(
-    name='glwindow',
-    sources=['./glwindow.cpp'],
-    libraries=['user32'],
-)
+if sys.platform == 'win32':
+    glwindow = Extension(
+        name='glwindow',
+        sources=['./glwindow.cpp'],
+        libraries=['user32'],
+    )
+
+if sys.platform == 'linux':
+    glwindow = Extension(
+        name='glwindow',
+        sources=['./glwindow_linux.cpp'],
+        libraries=['X11'],
+        extra_compile_args=['-fpermissive'],
+    )
 
 setup(
     name='glwindow',
