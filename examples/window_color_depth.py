@@ -6,7 +6,7 @@ from glnext_compiler import glsl
 window1 = glwindow.window((512, 512), '8 bits')
 window2 = glwindow.window((512, 512), '10 bits')
 
-instance = glnext.instance(surface=glnext.default_surface)
+instance = glnext.instance(surface=True)
 
 framebuffer1 = instance.framebuffer((512, 512), '4p')
 framebuffer2 = instance.framebuffer((512, 512), '4h')
@@ -93,5 +93,5 @@ while window1.visible and window2.visible:
             mx, my, mw = wnd.mouse
             rotation += mx * 0.01
 
-    staging.mem[:] = glnext.pack('1i 1f 1f', [8, rotation, scale])
+    staging.mem[:] = glnext.pack([rotation, scale])
     instance.run()

@@ -85,7 +85,7 @@ camera = Camera((4.0, 3.0, 2.0), (0.0, 0.0, 0.0), fov=60.0, aspect=1.777)
 
 wnd = glwindow.window()
 
-instance = glnext.instance(surface=glnext.default_surface)
+instance = glnext.instance(surface=True)
 fbo = instance.framebuffer(wnd.size)
 
 ubo = instance.buffer('uniform_buffer', 64)
