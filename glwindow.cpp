@@ -262,8 +262,14 @@ PyObject * Window_meth_grab_mouse(Window * self, PyObject * grab) {
 }
 
 PyObject * Window_meth_key_pressed(Window * self, PyObject * key) {
-    if (PyUnicode_CheckExact(key)) {
-        key = PyDict_GetItem(keymap, key);
+    if (!PyUnicode_CheckExact(key)) {
+        PyErr_Format(PyExc_ValueError, "key");
+        return NULL;
+    }
+    key = PyDict_GetItem(keymap, key);
+    if (!key) {
+        PyErr_Format(PyExc_ValueError, "key");
+        return NULL;
     }
     if (self->input[1].keys[PyLong_AsLong(key)] && !self->input[2].keys[PyLong_AsLong(key)]) {
         Py_RETURN_TRUE;
@@ -272,8 +278,14 @@ PyObject * Window_meth_key_pressed(Window * self, PyObject * key) {
 }
 
 PyObject * Window_meth_key_released(Window * self, PyObject * key) {
-    if (PyUnicode_CheckExact(key)) {
-        key = PyDict_GetItem(keymap, key);
+    if (!PyUnicode_CheckExact(key)) {
+        PyErr_Format(PyExc_ValueError, "key");
+        return NULL;
+    }
+    key = PyDict_GetItem(keymap, key);
+    if (!key) {
+        PyErr_Format(PyExc_ValueError, "key");
+        return NULL;
     }
     if (!self->input[1].keys[PyLong_AsLong(key)] && self->input[2].keys[PyLong_AsLong(key)]) {
         Py_RETURN_TRUE;
@@ -282,8 +294,14 @@ PyObject * Window_meth_key_released(Window * self, PyObject * key) {
 }
 
 PyObject * Window_meth_key_down(Window * self, PyObject * key) {
-    if (PyUnicode_CheckExact(key)) {
-        key = PyDict_GetItem(keymap, key);
+    if (!PyUnicode_CheckExact(key)) {
+        PyErr_Format(PyExc_ValueError, "key");
+        return NULL;
+    }
+    key = PyDict_GetItem(keymap, key);
+    if (!key) {
+        PyErr_Format(PyExc_ValueError, "key");
+        return NULL;
     }
     if (self->input[1].keys[PyLong_AsLong(key)]) {
         Py_RETURN_TRUE;
