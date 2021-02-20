@@ -422,6 +422,8 @@ extern "C" PyObject * PyInit_glwindow() {
         add_key(name, c);
     }
 
+    PyModule_AddObject(module, "keymap", keymap);
+
     return module;
 }
 
