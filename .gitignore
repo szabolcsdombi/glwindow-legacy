@@ -13,6 +13,5 @@ __pycache__
 *.pyd
 *.pbd
 *.lib
-*.txt
 
 temp_*
