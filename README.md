@@ -21,6 +21,8 @@ while window.visible:
     glwindow.update()
 ```
 
+**Multiple Windows**
+
 ```py
 import glwindow
 
@@ -34,6 +36,8 @@ while any(x.visible for x in windows):
     glwindow.update()
 ```
 
+**Keyboard Input**
+
 ```py
 import glwindow
 
@@ -44,6 +48,8 @@ while window.visible:
     if window.key_pressed('escape'):
         break
 ```
+
+**Vulkan Surface**
 
 ```py
 import glnext
