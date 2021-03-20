@@ -83,10 +83,10 @@ cube_mesh = glnext.pack([
 
 camera = Camera((4.0, 3.0, 2.0), (0.0, 0.0, 0.0), fov=60.0, aspect=1.777)
 
-wnd = glwindow.window()
-
 instance = glnext.instance(surface=True)
-fbo = instance.framebuffer(wnd.size)
+
+task = instance.task()
+fbo = task.framebuffer((1280, 720))
 
 ubo = instance.buffer('uniform_buffer', 64)
 
@@ -142,8 +142,9 @@ pipeline = fbo.render(
 
 pipeline.update(vertex_buffer=cube_mesh)
 
+wnd = glwindow.window()
+
 instance.surface(wnd.handle, fbo.output[0])
-wnd.show(True)
 
 fly = False
 
@@ -182,4 +183,5 @@ while wnd.visible:
             wnd.grab_mouse(True)
             fly = True
     ubo.write(camera.pack())
-    instance.run()
+    task.run()
+    instance.present()

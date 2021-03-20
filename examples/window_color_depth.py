@@ -8,8 +8,9 @@ window2 = glwindow.window((512, 512), '10 bits')
 
 instance = glnext.instance(surface=True)
 
-framebuffer1 = instance.framebuffer((512, 512), '4p')
-framebuffer2 = instance.framebuffer((512, 512), '4h')
+task = instance.task()
+framebuffer1 = task.framebuffer((512, 512), '4p')
+framebuffer2 = task.framebuffer((512, 512), '4h')
 
 uniform_buffer = instance.buffer('uniform_buffer', 8)
 
@@ -66,22 +67,11 @@ for fbo in [framebuffer1, framebuffer2]:
         ]
     )
 
-staging = instance.staging([
-    {
-        'offset': 0,
-        'type': 'input_buffer',
-        'buffer': uniform_buffer,
-    }
-])
-
 instance.surface(window1.handle, framebuffer1.output[0])
 instance.surface(window2.handle, framebuffer2.output[0])
 
 rotation = 0.0
 scale = 1.0
-
-window1.show(True)
-window2.show(True)
 
 while window1.visible and window2.visible:
     glwindow.update()
@@ -93,5 +83,6 @@ while window1.visible and window2.visible:
             mx, my, mw = wnd.mouse
             rotation += mx * 0.01
 
-    staging.mem[:] = glnext.pack([rotation, scale])
-    instance.run()
+    uniform_buffer.write(glnext.pack([rotation, scale]))
+    task.run()
+    instance.present()

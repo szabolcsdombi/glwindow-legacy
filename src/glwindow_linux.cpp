@@ -40,15 +40,27 @@ Display * display;
 XContext window_ctx;
 
 XWindow * glwindow_meth_window(PyObject * self, PyObject * vargs, PyObject * kwargs) {
-    static char * keywords[] = {"size", "title", NULL};
+    static char * keywords[] = {"size", "title", "visible", NULL};
 
     struct {
         int width = 1280;
         int height = 720;
         const char * title = NULL;
+        int visible = true;
     } args;
 
-    if (!PyArg_ParseTupleAndKeywords(vargs, kwargs, "|(II)z", keywords, &args.width, &args.height, &args.title)) {
+    int args_ok = PyArg_ParseTupleAndKeywords(
+        vargs,
+        kwargs,
+        "|(II)zp",
+        keywords,
+        &args.width,
+        &args.height,
+        &args.title,
+        &args.visible
+    );
+
+    if (!args_ok) {
         return NULL;
     }
 
@@ -94,6 +106,12 @@ XWindow * glwindow_meth_window(PyObject * self, PyObject * vargs, PyObject * kwa
     XSelectInput(display, res->window, events);
 
     XSaveContext(display, res->window, window_ctx, (XPointer)res);
+
+    if (args.visible) {
+        XMapWindow(display, res->window);
+        res->input[1].visible = true;
+        res->input[0].visible = true;
+    }
 
     PyList_Append(window_list, (PyObject *)res);
     return res;
@@ -169,16 +187,21 @@ PyObject * glwindow_meth_update(PyObject * self) {
     Py_RETURN_NONE;
 }
 
-PyObject * Window_meth_show(XWindow * self, PyObject * arg) {
-    bool show = !!PyObject_IsTrue(arg);
-    if (show && !self->input[1].visible) {
+PyObject * Window_meth_show(XWindow * self) {
+    if (!self->input[1].visible) {
         XMapWindow(display, self->window);
+        self->input[1].visible = true;
+        self->input[0].visible = true;
     }
-    if (!show && self->input[1].visible) {
+    Py_RETURN_NONE;
+}
+
+PyObject * Window_meth_hide(XWindow * self) {
+    if (self->input[1].visible) {
         XUnmapWindow(display, self->window);
+        self->input[1].visible = false;
+        self->input[0].visible = false;
     }
-    self->input[1].visible = show;
-    self->input[0].visible = show;
     Py_RETURN_NONE;
 }
 
@@ -287,7 +310,8 @@ void default_dealloc(PyObject * self) {
 }
 
 PyMethodDef Window_methods[] = {
-    {"show", (PyCFunction)Window_meth_show, METH_O, NULL},
+    {"show", (PyCFunction)Window_meth_show, METH_NOARGS, NULL},
+    {"hide", (PyCFunction)Window_meth_hide, METH_NOARGS, NULL},
     {"grab_mouse", (PyCFunction)Window_meth_grab_mouse, METH_O, NULL},
     {"key_pressed", (PyCFunction)Window_meth_key_pressed, METH_O, NULL},
     {"key_released", (PyCFunction)Window_meth_key_released, METH_O, NULL},

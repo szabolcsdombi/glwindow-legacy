@@ -1,51 +1,3 @@
-# glwindow
-
-```
-pip install glwindow
-```
-
-- [Documentation](https://glwindow.readthedocs.io/)
-- [glwindow on Github](https://github.com/glnext/glwindow/)
-- [glwindow on PyPI](https://pypi.org/project/glwindow/)
-
-A simple window with **your** own main loop.
-
-## Examples
-
-```py
-import glwindow
-
-window = glwindow.window()
-
-while window.visible:
-    glwindow.update()
-```
-
-```py
-import glwindow
-
-windows = [
-    glwindow.window((640, 480)),
-    glwindow.window((640, 480)),
-    glwindow.window((640, 480)),
-]
-
-while any(x.visible for x in windows):
-    glwindow.update()
-```
-
-```py
-import glwindow
-
-window = glwindow.window()
-
-while window.visible:
-    glwindow.update()
-    if window.key_pressed('escape'):
-        break
-```
-
-```py
 import glnext
 import glwindow
 from glnext_compiler import glsl
@@ -103,4 +55,3 @@ while wnd.visible:
     glwindow.update()
     task.run()
     instance.present()
-```
